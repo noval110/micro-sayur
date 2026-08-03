@@ -1,0 +1,8 @@
+go 1.26.4
+
+use (
+	./order-service
+	./payment-service
+	./produk-service
+	./user-service
+)

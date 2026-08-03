@@ -1,0 +1,139 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_sayur_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - ./produk-service/database/migrations/000001_create_products_table.up.sql:/migrations/products.sql:ro
+      - ./order-service/database/migrations/000001_create_orders_table.up.sql:/migrations/orders.sql:ro
+      - ./order-service/database/migrations/000002_create_order_items_table.up.sql:/migrations/order-items.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  product-service:
+    build:
+      context: ./produk-service
+    container_name: product_service
+    ports:
+      - "8081:8081"
+    environment:
+      APP_PORT: "8081"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgrespassword
+      DATABASE_NAME: sayur_product_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: ./order-service
+    container_name: order_service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: postgres
+      DB_PASSWORD: postgrespassword
+      DB_NAME: sayur_order_db
+      PRODUCT_SERVICE_URL: http://product-service:8081
+    depends_on:
+      postgres:
+        condition: service_healthy
+      product-service:
+        condition: service_started
+
+  payment-service:
+    build:
+      context: ./payment-service
+    container_name: payment_service
+    ports:
+      - "8083:8083"
+    environment:
+      ORDER_SERVICE_URL: http://order-service:8082
+    depends_on:
+      order-service:
+        condition: service_started
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_sayur_container
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    container_name: rabbitmq_sayur_container
+    environment:
+      RABBITMQ_DEFAULT_USER: sayur
+      RABBITMQ_DEFAULT_PASS: sayurpassword
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  user-service:
+    build:
+      context: ./user-service
+    container_name: user_service_container
+    ports:
+      - "8084:8084"
+    environment:
+      APP_PORT: "8084"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgrespassword
+      DATABASE_NAME: sayur_user_db
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-rahasia_super_aman}
+      JWT_ISSUER: micro-sayur
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: "5672"
+      RABBITMQ_USER: sayur
+      RABBITMQ_PASSWORD: sayurpassword
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  api-gateway:
+    image: nginx:alpine
+    container_name: api_gateway_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      product-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+
+volumes:
+  pgdata:

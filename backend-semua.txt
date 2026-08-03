@@ -1,0 +1,2521 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/streadway/amqp"
+)
+
+type NotificationMessage struct {
+	Email   string `json:"email"`
+	Massage string `json:"massage"`
+}
+
+func main() {
+	amqpURL := os.Getenv("RABBITMQ_URL")
+	if amqpURL == "" {
+		amqpURL = "amqp://guest:guest@localhost:5672/"
+	}
+
+	conn, err := amqp.Dial(amqpURL)
+	if err != nil {
+		log.Fatalf("[NotificationService] Gagal konek ke RabbitMQ: %v", err)
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("[NotificationService] Gagal membuka channel: %v", err)
+	}
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		"email_verification", // Sesuai dengan notif_type di user-service
+		true,                 // durable
+		false,                // delete when unused
+		false,                // exclusive
+		false,                // no-wait
+		nil,                  // arguments
+	)
+	if err != nil {
+		log.Fatalf("[NotificationService] Gagal declare queue: %v", err)
+	}
+
+	msgs, err := ch.Consume(
+		q.Name,
+		"",
+		true,  // auto-ack
+		false, // exclusive
+		false, // no-local
+		false, // no-wait
+		nil,   // args
+	)
+	if err != nil {
+		log.Fatalf("[NotificationService] Gagal meregister consumer: %v", err)
+	}
+
+	forever := make(chan bool)
+
+	go func() {
+		for d := range msgs {
+			var notif NotificationMessage
+			err := json.Unmarshal(d.Body, &notif)
+			if err != nil {
+				log.Printf("Error unmarshal message: %v", err)
+				continue
+			}
+
+			fmt.Println("--------------------------------------------------")
+			log.Printf("📧 [NOTIFIKASI TERIKIRIM] Ke Email: %s", notif.Email)
+			log.Printf("📝 Pesan: %s", notif.Massage)
+			fmt.Println("--------------------------------------------------")
+
+			// DI SINI: Kamu bisa menambahkan library SMTP (seperti net/smtp atau gomail)
+			// untuk mengirimkan email beneran ke user!
+		}
+	}()
+
+	log.Printf(" [*] Notification Service listening di queue '%s'. Tekan CTRL+C untuk keluar", q.Name)
+	<-forever
+}
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+)
+
+var rootCmd = &cobra.Command{
+	Use:   "order-service",
+	Short: "Order Service CLI App",
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+package cmd
+
+import (
+	"github.com/micro-sayur/order-service/internal/app"
+
+	"github.com/spf13/cobra"
+)
+
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Start order service HTTP server",
+	Run: func(cmd *cobra.Command, args []string) {
+		app.StartApp()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(startCmd)
+}
+package config
+package config
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
+	_ "github.com/lib/pq"
+)
+
+func InitDB() *sql.DB {
+	host := getEnv("DB_HOST", "127.0.0.1")
+	port := getEnv("DB_PORT", "5432")
+	user := getEnv("DB_USER", "postgres")
+	password := getEnv("DB_PASSWORD", "postgres")
+	database := getEnv("DB_NAME", "sayur_order_db")
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, database)
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatalf("Gagal membuka koneksi database: %v", err)
+	}
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Gagal ping database: %v", err)
+	}
+
+	fmt.Printf("Berhasil terhubung ke database %s!\n", database)
+	return db
+}
+
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+package config
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "github.com/lib/pq"
+)
+
+func InitDB() *sql.DB {
+	// Pakai 127.0.0.1 secara langsung tanpa variabel env dulu untuk memastikan
+	dsn := "host=127.0.0.1 port=5432 user=postgres password=postgres dbname=sayur_order_db sslmode=disable"
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatalf("Gagal membuka koneksi database: %v", err)
+	}
+
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Gagal ping database: %v", err)
+	}
+
+	fmt.Println("Berhasil terhubung ke database sayur_order_db!")
+	return db
+}
+package client
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"time"
+)
+
+type ProductResponse struct {
+	Data struct {
+		ID    int     `json:"id"`
+		Name  string  `json:"name"`
+		Price float64 `json:"price"`
+		Stock int     `json:"stock"`
+	} `json:"data"`
+	Message string `json:"message"`
+}
+
+type ProductClient interface {
+	GetProductByID(productID int) (*ProductResponse, error)
+	ReduceStock(productID int, quantity int) error
+}
+
+type productClient struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+func NewProductClient(baseURL string) ProductClient {
+	return &productClient{
+		baseURL: baseURL,
+		httpClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}
+}
+
+func (c *productClient) GetProductByID(productID int) (*ProductResponse, error) {
+	url := fmt.Sprintf("%s/products/%d", c.baseURL, productID)
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("produk ID %d tidak ditemukan (status: %d)", productID, resp.StatusCode)
+	}
+
+	var productResp ProductResponse
+	if err := json.NewDecoder(resp.Body).Decode(&productResp); err != nil {
+		return nil, err
+	}
+
+	return &productResp, nil
+}
+
+func (c *productClient) ReduceStock(productID int, quantity int) error {
+	url := fmt.Sprintf("%s/products/%d/reduce-stock", c.baseURL, productID)
+	payload, err := json.Marshal(map[string]int{"quantity": quantity})
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(payload))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("gagal mengurangi stok produk ID %d (status: %d)", productID, resp.StatusCode)
+	}
+
+	return nil
+}
+package handler
+
+import (
+	"database/sql"
+	"errors"
+	"github.com/micro-sayur/order-service/internal/adapter/repository"
+	"github.com/micro-sayur/order-service/internal/core/dto"
+	"github.com/micro-sayur/order-service/internal/core/service"
+	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+)
+
+type OrderHandler struct {
+	orderService service.OrderService
+}
+
+func NewOrderHandler(os service.OrderService) *OrderHandler {
+	return &OrderHandler{orderService: os}
+}
+
+func (h *OrderHandler) CreateOrder(c echo.Context) error {
+	var req dto.CreateOrderRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid request body"})
+	}
+
+	order, err := h.orderService.CreateOrder(c.Request().Context(), req)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, echo.Map{
+		"message": "order created successfully",
+		"data":    order,
+	})
+}
+
+func (h *OrderHandler) GetAllOrders(c echo.Context) error {
+	orders, err := h.orderService.GetAllOrders(c.Request().Context())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success get all orders",
+		"data":    orders,
+	})
+}
+
+func (h *OrderHandler) GetOrderByID(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id < 1 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid order id"})
+	}
+
+	order, err := h.orderService.GetOrderByID(c.Request().Context(), id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.JSON(http.StatusNotFound, echo.Map{"message": "order not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message": "success get order detail",
+		"data":    order,
+	})
+}
+
+func (h *OrderHandler) UpdateOrderStatus(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id < 1 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid order id"})
+	}
+
+	status := c.QueryParam("status")
+	if status != "PAID" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "status harus PAID"})
+	}
+
+	if err := h.orderService.UpdateOrderStatus(c.Request().Context(), id, status); err != nil {
+		if errors.Is(err, repository.ErrOrderNotPending) {
+			return c.JSON(http.StatusConflict, echo.Map{"message": err.Error()})
+		}
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "gagal update status order"})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"message": "status order berhasil diperbarui"})
+}
+package repository
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"github.com/micro-sayur/order-service/internal/core/domain"
+)
+
+var ErrOrderNotPending = errors.New("order tidak ditemukan atau statusnya bukan PENDING")
+
+type OrderRepository interface {
+	CreateOrder(ctx context.Context, order *domain.Order) error
+	GetAllOrders(ctx context.Context) ([]domain.Order, error)
+	GetOrderByID(ctx context.Context, id int) (*domain.Order, error)
+	UpdateOrderStatus(ctx context.Context, id int, status string) error
+}
+
+type orderRepository struct {
+	db *sql.DB
+}
+
+func NewOrderRepository(db *sql.DB) OrderRepository {
+	return &orderRepository{db: db}
+}
+
+func (r *orderRepository) CreateOrder(ctx context.Context, order *domain.Order) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	queryOrder := `INSERT INTO orders (user_id, total_price, status) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at`
+	err = tx.QueryRowContext(ctx, queryOrder, order.UserID, order.TotalPrice, "PENDING").Scan(&order.ID, &order.CreatedAt, &order.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	queryItem := `INSERT INTO order_items (order_id, product_id, product_name, price, quantity) VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	for i := range order.Items {
+		order.Items[i].OrderID = order.ID
+		err = tx.QueryRowContext(ctx, queryItem, order.ID, order.Items[i].ProductID, order.Items[i].ProductName, order.Items[i].Price, order.Items[i].Quantity).Scan(&order.Items[i].ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	order.Status = "PENDING"
+	return tx.Commit()
+}
+
+func (r *orderRepository) GetAllOrders(ctx context.Context) ([]domain.Order, error) {
+	query := `SELECT id, user_id, total_price, status, created_at, updated_at FROM orders ORDER BY id DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []domain.Order
+	for rows.Next() {
+		var order domain.Order
+		if err := rows.Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt); err != nil {
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
+func (r *orderRepository) GetOrderByID(ctx context.Context, id int) (*domain.Order, error) {
+	var order domain.Order
+	queryOrder := `SELECT id, user_id, total_price, status, created_at, updated_at FROM orders WHERE id = $1`
+	if err := r.db.QueryRowContext(ctx, queryOrder, id).Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt); err != nil {
+		return nil, err
+	}
+
+	queryItems := `SELECT id, order_id, product_id, product_name, price, quantity FROM order_items WHERE order_id = $1`
+	rows, err := r.db.QueryContext(ctx, queryItems, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var item domain.OrderItem
+		if err := rows.Scan(&item.ID, &item.OrderID, &item.ProductID, &item.ProductName, &item.Price, &item.Quantity); err != nil {
+			return nil, err
+		}
+		order.Items = append(order.Items, item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &order, nil
+}
+
+func (r *orderRepository) UpdateOrderStatus(ctx context.Context, id int, status string) error {
+	result, err := r.db.ExecContext(ctx,
+		`UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND status = 'PENDING'`,
+		status, id,
+	)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrOrderNotPending
+	}
+
+	return nil
+}
+package app
+
+import (
+	"github.com/micro-sayur/order-service/config"
+	"github.com/micro-sayur/order-service/internal/adapter/client"
+	"github.com/micro-sayur/order-service/internal/adapter/handler"
+	"github.com/micro-sayur/order-service/internal/adapter/repository"
+	"github.com/micro-sayur/order-service/internal/core/service"
+	"github.com/micro-sayur/order-service/utils/validator"
+	"os"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+func StartApp() {
+	// Inisialisasi DB
+	db := config.InitDB()
+	defer db.Close()
+
+	productServiceURL := os.Getenv("PRODUCT_SERVICE_URL")
+	if productServiceURL == "" {
+		productServiceURL = "http://127.0.0.1:8081"
+	}
+	productClient := client.NewProductClient(productServiceURL)
+
+	// Inisialisasi Layer Clean Architecture
+	orderRepo := repository.NewOrderRepository(db)
+	orderService := service.NewOrderService(orderRepo, productClient)
+	orderHandler := handler.NewOrderHandler(orderService)
+
+	// Setup Echo
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+	e.Validator = validator.NewCustomValidator()
+
+	// Routes
+	e.POST("/orders", orderHandler.CreateOrder)
+	e.GET("/orders", orderHandler.GetAllOrders)
+	e.GET("/orders/:id", orderHandler.GetOrderByID)
+	e.PATCH("/orders/:id/status", orderHandler.UpdateOrderStatus)
+
+	// Start Server
+	e.Logger.Fatal(e.Start(":8082"))
+}
+package domain
+
+import "time"
+
+type Order struct {
+	ID         int         `json:"id"`
+	UserID     int         `json:"user_id"`
+	TotalPrice float64     `json:"total_price"`
+	Status     string      `json:"status"`
+	Items      []OrderItem `json:"items,omitempty"`
+	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  time.Time   `json:"updated_at"`
+}
+
+type OrderItem struct {
+	ID          int     `json:"id"`
+	OrderID     int     `json:"order_id"`
+	ProductID   int     `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	Price       float64 `json:"price"`
+	Quantity    int     `json:"quantity"`
+}
+package dto
+
+type CreateOrderItemRequest struct {
+	ProductID   int     `json:"product_id" validate:"required"`
+	ProductName string  `json:"product_name"`
+	Price       float64 `json:"price" validate:"required"`
+	Quantity    int     `json:"quantity" validate:"required,min=1"`
+}
+
+type CreateOrderRequest struct {
+	UserID int                      `json:"user_id" validate:"required"`
+	Items  []CreateOrderItemRequest `json:"items" validate:"required,dive"`
+}
+package service
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/micro-sayur/order-service/internal/adapter/client"
+	"github.com/micro-sayur/order-service/internal/adapter/repository"
+	"github.com/micro-sayur/order-service/internal/core/domain"
+	"github.com/micro-sayur/order-service/internal/core/dto"
+)
+
+type OrderService interface {
+	CreateOrder(ctx context.Context, req dto.CreateOrderRequest) (*domain.Order, error)
+	GetAllOrders(ctx context.Context) ([]domain.Order, error)
+	GetOrderByID(ctx context.Context, id int) (*domain.Order, error)
+	UpdateOrderStatus(ctx context.Context, id int, status string) error
+}
+
+type orderService struct {
+	repo          repository.OrderRepository
+	productClient client.ProductClient
+}
+
+func NewOrderService(repo repository.OrderRepository, productClient client.ProductClient) OrderService {
+	return &orderService{
+		repo:          repo,
+		productClient: productClient,
+	}
+}
+
+func (s *orderService) CreateOrder(ctx context.Context, req dto.CreateOrderRequest) (*domain.Order, error) {
+	var totalPrice float64
+	var orderItems []domain.OrderItem
+
+	for _, item := range req.Items {
+		product, err := s.productClient.GetProductByID(item.ProductID)
+		if err != nil {
+			return nil, err
+		}
+
+		if product.Data.Stock < item.Quantity {
+			return nil, fmt.Errorf("stok untuk produk '%s' tidak mencukupi (sisa: %d)", product.Data.Name, product.Data.Stock)
+		}
+
+		totalPrice += product.Data.Price * float64(item.Quantity)
+		orderItems = append(orderItems, domain.OrderItem{
+			ProductID:   item.ProductID,
+			ProductName: product.Data.Name,
+			Price:       product.Data.Price,
+			Quantity:    item.Quantity,
+		})
+	}
+
+	order := &domain.Order{
+		UserID:     req.UserID,
+		TotalPrice: totalPrice,
+		Status:     "PENDING",
+		Items:      orderItems,
+	}
+
+	if err := s.repo.CreateOrder(ctx, order); err != nil {
+		return nil, err
+	}
+
+	for _, item := range order.Items {
+		if err := s.productClient.ReduceStock(item.ProductID, item.Quantity); err != nil {
+			return nil, fmt.Errorf("gagal memotong stok untuk produk ID %d: %w", item.ProductID, err)
+		}
+	}
+
+	return order, nil
+}
+
+func (s *orderService) GetAllOrders(ctx context.Context) ([]domain.Order, error) {
+	return s.repo.GetAllOrders(ctx)
+}
+
+func (s *orderService) GetOrderByID(ctx context.Context, id int) (*domain.Order, error) {
+	return s.repo.GetOrderByID(ctx, id)
+}
+
+func (s *orderService) UpdateOrderStatus(ctx context.Context, id int, status string) error {
+	if status != "PAID" {
+		return fmt.Errorf("status order tidak didukung: %s", status)
+	}
+
+	return s.repo.UpdateOrderStatus(ctx, id, status)
+}
+package validator
+
+import (
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
+)
+
+type CustomValidator struct {
+	Validator *validator.Validate
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	if err := cv.Validator.Struct(i); err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewCustomValidator() echo.Validator {
+	return &CustomValidator{Validator: validator.New()}
+}
+package main
+
+import "github.com/micro-sayur/order-service/cmd"
+
+func main() {
+	cmd.Execute()
+}
+package client
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"net/url"
+	"time"
+)
+
+var ErrOrderNotFound = errors.New("order tidak ditemukan")
+
+type OrderClient interface {
+	GetOrderByID(orderID int) (*Order, error)
+	UpdateOrderStatus(orderID int, status string) error
+}
+
+type Order struct {
+	ID         int     `json:"id"`
+	TotalPrice float64 `json:"total_price"`
+	Status     string  `json:"status"`
+}
+
+type orderClient struct {
+	baseURL    string
+	httpClient *http.Client
+}
+
+func NewOrderClient(baseURL string) OrderClient {
+	return &orderClient{
+		baseURL:    baseURL,
+		httpClient: &http.Client{Timeout: 10 * time.Second},
+	}
+}
+
+func (c *orderClient) GetOrderByID(orderID int) (*Order, error) {
+	endpoint := fmt.Sprintf("%s/orders/%d", c.baseURL, orderID)
+	resp, err := c.httpClient.Get(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, ErrOrderNotFound
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("gagal mengambil order ID %d: order-service merespons %s", orderID, resp.Status)
+	}
+
+	var response struct {
+		Data Order `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, fmt.Errorf("gagal membaca respons order-service: %w", err)
+	}
+
+	return &response.Data, nil
+}
+
+func (c *orderClient) UpdateOrderStatus(orderID int, status string) error {
+	endpoint := fmt.Sprintf("%s/orders/%d/status", c.baseURL, orderID)
+	requestURL, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+
+	query := requestURL.Query()
+	query.Set("status", status)
+	requestURL.RawQuery = query.Encode()
+
+	req, err := http.NewRequest(http.MethodPatch, requestURL.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("gagal mengupdate status order ID %d: order-service merespons %s", orderID, resp.Status)
+	}
+
+	return nil
+}
+package handler
+
+import (
+	"errors"
+	"net/http"
+	"payment-service/internal/client"
+
+	"github.com/labstack/echo/v4"
+)
+
+type PaymentHandler struct {
+	orderClient client.OrderClient
+}
+
+func NewPaymentHandler(oc client.OrderClient) *PaymentHandler {
+	return &PaymentHandler{orderClient: oc}
+}
+
+type ProcessPaymentReq struct {
+	OrderID int     `json:"order_id"`
+	Amount  float64 `json:"amount"`
+}
+
+func (h *PaymentHandler) PayOrder(c echo.Context) error {
+	var req ProcessPaymentReq
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "payload tidak valid"})
+	}
+	if req.OrderID < 1 || req.Amount <= 0 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "order_id dan amount harus lebih besar dari 0"})
+	}
+
+	order, err := h.orderClient.GetOrderByID(req.OrderID)
+	if err != nil {
+		if errors.Is(err, client.ErrOrderNotFound) {
+			return c.JSON(http.StatusNotFound, echo.Map{"message": "order tidak ditemukan"})
+		}
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "gagal mengambil data order: " + err.Error()})
+	}
+
+	if order.Status == "PAID" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "order ini sudah dibayar sebelumnya"})
+	}
+
+	if req.Amount < order.TotalPrice {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "jumlah pembayaran kurang dari total tagihan"})
+	}
+
+	if err := h.orderClient.UpdateOrderStatus(req.OrderID, "PAID"); err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{
+			"message": "pembayaran gagal diproses: " + err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"message":  "pembayaran berhasil",
+		"order_id": req.OrderID,
+		"status":   "PAID",
+	})
+}
+package main
+
+import (
+	"os"
+	"payment-service/internal/client"
+	"payment-service/internal/handler"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+func main() {
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	orderServiceURL := os.Getenv("ORDER_SERVICE_URL")
+	if orderServiceURL == "" {
+		orderServiceURL = "http://127.0.0.1:8082"
+	}
+	orderClient := client.NewOrderClient(orderServiceURL)
+	paymentHandler := handler.NewPaymentHandler(orderClient)
+
+	// payment-service berjalan pada port 8083.
+	e.POST("/payments", paymentHandler.PayOrder)
+
+	e.Logger.Fatal(e.Start(":8083"))
+}
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+var cfgFile string
+
+var rootCmd = &cobra.Command{
+	Use:   "product-service",
+	Short: "API Product Service for Sayur App",
+}
+
+func Execute() {
+	cobra.CheckErr(rootCmd.Execute())
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is .env)")
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.SetConfigFile(".env")
+	}
+	viper.AutomaticEnv()
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	}
+}
+package cmd
+
+import (
+	"product-service/internal/app"
+
+	"github.com/spf13/cobra"
+)
+
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "start product service server",
+	Run: func(cmd *cobra.Command, args []string) {
+		app.RunServer()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(startCmd)
+}
+package config
+
+import "github.com/spf13/viper"
+
+type App struct {
+	AppPort string `json:"app_port"`
+	AppEnv  string `json:"app_env"`
+}
+
+type PsqlDB struct {
+	Host      string `json:"host"`
+	Port      string `json:"port"`
+	User      string `json:"user"`
+	Password  string `json:"password"`
+	Dbname    string `json:"db_name"`
+	DBmaxOpen int    `json:"db_max_open"`
+	DBmaxIdle int    `json:"db_max_idle"`
+}
+
+type Config struct {
+	App  App    `json:"app"`
+	Psql PsqlDB `json:"psql"`
+}
+
+func NewConfig() *Config {
+	return &Config{
+		App: App{
+			AppPort: viper.GetString("APP_PORT"),
+			AppEnv:  viper.GetString("APP_ENV"),
+		},
+		Psql: PsqlDB{
+			Host:      viper.GetString("DATABASE_HOST"),
+			Port:      viper.GetString("DATABASE_PORT"),
+			User:      viper.GetString("DATABASE_USER"),
+			Password:  viper.GetString("DATABASE_PASSWORD"),
+			Dbname:    viper.GetString("DATABASE_NAME"),
+			DBmaxOpen: viper.GetInt("DATABASE_MAX_OPEN_CONNECTIONS"),
+			DBmaxIdle: viper.GetInt("DATABASE_MAX_IDLE_CONNECTIONS"),
+		},
+	}
+}
+package config
+
+import (
+	"fmt"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+type Postgres struct {
+	DB *gorm.DB
+}
+
+func (cfg Config) ConnectionPostgres() (*Postgres, error) {
+	dbConnString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.Psql.User,
+		cfg.Psql.Password,
+		cfg.Psql.Host,
+		cfg.Psql.Port,
+		cfg.Psql.Dbname,
+	)
+
+	db, err := gorm.Open(postgres.Open(dbConnString), &gorm.Config{})
+	if err != nil {
+		log.Error().Err(err).Msg("[ConnectionPostgres-1] Failed to connect to Postgres")
+		return nil, err
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(cfg.Psql.DBmaxOpen)
+	sqlDB.SetMaxIdleConns(cfg.Psql.DBmaxIdle)
+
+	return &Postgres{DB: db}, nil
+}
+package seeds
+
+import (
+	"log"
+	"product-service/internal/core/domain/model"
+
+	"gorm.io/gorm"
+)
+
+func SeedProducts(db *gorm.DB) {
+	products := []model.Product{
+		{Name: "Bayam Hijau Organik", Category: "Sayuran Segar", Price: 8500, Stock: 50, Unit: "250 gram", Image: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500", Rating: 4.9},
+		{Name: "Wortel Berastagi Super", Category: "Sayuran Segar", Price: 12000, Stock: 30, Unit: "500 gram", Image: "https://images.unsplash.com/photo-1598170845058-12ef4a457939?w=500", Rating: 4.8},
+		{Name: "Alpukat Mentega Super", Category: "Buah Segar", Price: 35000, Stock: 20, Unit: "1 kg", Image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=500", Rating: 5.0},
+	}
+
+	for _, p := range products {
+		if err := db.FirstOrCreate(&p, model.Product{Name: p.Name}).Error; err != nil {
+			log.Fatalf("Seed error: %v", err)
+		}
+	}
+}
+package request
+
+type CreateProductRequest struct {
+	Name     string  `json:"name" validate:"required"`
+	Category string  `json:"category" validate:"required"`
+	Price    float64 `json:"price" validate:"required,gt=0"`
+	Stock    int     `json:"stock" validate:"required,gte=0"`
+	Unit     string  `json:"unit" validate:"required"`
+	Image    string  `json:"image"`
+}
+package response
+
+type ProductResponse struct {
+	ID       int64   `json:"id"`
+	Name     string  `json:"name"`
+	Category string  `json:"category"`
+	Price    float64 `json:"price"`
+	Stock    int     `json:"stock"`
+	Unit     string  `json:"unit"`
+	Image    string  `json:"image"`
+	Rating   float64 `json:"rating"`
+}
+package handler
+
+import (
+	"net/http"
+	"product-service/config"
+	"product-service/internal/adapter/handler/request"
+	"product-service/internal/core/domain/entity"
+	"product-service/internal/core/service"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
+)
+
+type ProductHandlerInterface interface {
+	GetProducts(c echo.Context) error
+	GetProductByID(c echo.Context) error
+	ReduceStock(c echo.Context) error
+	CreateProduct(c echo.Context) error
+}
+
+type productHandler struct {
+	service service.ProductServiceInterface
+}
+
+type ReduceStockRequest struct {
+	Quantity int `json:"quantity"`
+}
+
+func (h *productHandler) GetProducts(c echo.Context) error {
+	ctx := c.Request().Context()
+	products, err := h.service.GetAllProducts(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": err.Error(),
+			"data":    nil,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success",
+		"data":    products,
+	})
+}
+
+func (h *productHandler) GetProductByID(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || id < 1 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "ID tidak valid"})
+	}
+
+	product, err := h.service.GetProductByID(c.Request().Context(), id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": "Produk tidak ditemukan"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"data":    product,
+		"message": "success get product detail",
+	})
+}
+
+func (h *productHandler) ReduceStock(c echo.Context) error {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || id < 1 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "ID tidak valid"})
+	}
+
+	var req ReduceStockRequest
+	if err := c.Bind(&req); err != nil || req.Quantity < 1 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"message": "payload tidak valid"})
+	}
+
+	if err := h.service.ReduceStock(c.Request().Context(), id, req.Quantity); err != nil {
+		return c.JSON(http.StatusConflict, map[string]string{"message": "gagal mengurangi stok"})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "stok berhasil dikurangi"})
+}
+
+func (h *productHandler) CreateProduct(c echo.Context) error {
+	var req request.CreateProductRequest
+	ctx := c.Request().Context()
+
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, map[string]interface{}{"message": err.Error()})
+	}
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, map[string]interface{}{"message": err.Error()})
+	}
+
+	reqEntity := entity.ProductEntity{
+		Name:     req.Name,
+		Category: req.Category,
+		Price:    req.Price,
+		Stock:    req.Stock,
+		Unit:     req.Unit,
+		Image:    req.Image,
+	}
+
+	if err := h.service.CreateProduct(ctx, reqEntity); err != nil {
+		log.Errorf("[ProductHandler] CreateProduct error: %v", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{"message": err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, map[string]interface{}{
+		"message": "product created successfully",
+		"data":    nil,
+	})
+}
+
+func NewProductHandler(e *echo.Echo, service service.ProductServiceInterface, cfg *config.Config) ProductHandlerInterface {
+	handler := &productHandler{service: service}
+
+	e.Use(middleware.Recover())
+	e.GET("/products", handler.GetProducts)
+	e.GET("/products/:id", handler.GetProductByID)
+	e.PATCH("/products/:id/reduce-stock", handler.ReduceStock)
+	e.POST("/products", handler.CreateProduct)
+
+	return handler
+}
+package repository
+
+import (
+	"context"
+	"errors"
+	"product-service/internal/core/domain/entity"
+	"product-service/internal/core/domain/model"
+
+	"github.com/labstack/gommon/log"
+	"gorm.io/gorm"
+)
+
+var ErrInsufficientStock = errors.New("stok produk tidak mencukupi atau produk tidak ditemukan")
+
+type ProductRepositoryInterface interface {
+	GetAllProducts(ctx context.Context) ([]entity.ProductEntity, error)
+	GetProductByID(ctx context.Context, id int64) (*entity.ProductEntity, error)
+	ReduceStock(ctx context.Context, id int64, quantity int) error
+	CreateProduct(ctx context.Context, req entity.ProductEntity) error
+}
+
+type productRepository struct {
+	db *gorm.DB
+}
+
+func NewProductRepository(db *gorm.DB) ProductRepositoryInterface {
+	return &productRepository{db: db}
+}
+
+func (r *productRepository) GetAllProducts(ctx context.Context) ([]entity.ProductEntity, error) {
+	var models []model.Product
+	if err := r.db.WithContext(ctx).Find(&models).Error; err != nil {
+		log.Errorf("[ProductRepository-1] GetAllProducts: %v", err)
+		return nil, err
+	}
+
+	var entities []entity.ProductEntity
+	for _, m := range models {
+		entities = append(entities, entity.ProductEntity{
+			ID:       m.ID,
+			Name:     m.Name,
+			Category: m.Category,
+			Price:    m.Price,
+			Stock:    m.Stock,
+			Unit:     m.Unit,
+			Image:    m.Image,
+			Rating:   m.Rating,
+		})
+	}
+	return entities, nil
+}
+
+func (r *productRepository) GetProductByID(ctx context.Context, id int64) (*entity.ProductEntity, error) {
+	var product model.Product
+	if err := r.db.WithContext(ctx).First(&product, id).Error; err != nil {
+		log.Errorf("[ProductRepository-2] GetProductByID: %v", err)
+		return nil, err
+	}
+
+	return &entity.ProductEntity{
+		ID:       product.ID,
+		Name:     product.Name,
+		Category: product.Category,
+		Price:    product.Price,
+		Stock:    product.Stock,
+		Unit:     product.Unit,
+		Image:    product.Image,
+		Rating:   product.Rating,
+	}, nil
+}
+
+func (r *productRepository) ReduceStock(ctx context.Context, id int64, quantity int) error {
+	result := r.db.WithContext(ctx).
+		Model(&model.Product{}).
+		Where("id = ? AND stock >= ?", id, quantity).
+		Update("stock", gorm.Expr("stock - ?", quantity))
+	if result.Error != nil {
+		log.Errorf("[ProductRepository-3] ReduceStock: %v", result.Error)
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrInsufficientStock
+	}
+
+	return nil
+}
+
+func (r *productRepository) CreateProduct(ctx context.Context, req entity.ProductEntity) error {
+	m := model.Product{
+		Name:     req.Name,
+		Category: req.Category,
+		Price:    req.Price,
+		Stock:    req.Stock,
+		Unit:     req.Unit,
+		Image:    req.Image,
+	}
+
+	if err := r.db.WithContext(ctx).Create(&m).Error; err != nil {
+		log.Errorf("[ProductRepository-4] CreateProduct: %v", err)
+		return err
+	}
+	return nil
+}
+package app
+
+import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"product-service/config"
+	"product-service/internal/adapter/handler"
+	"product-service/internal/adapter/repository"
+	"product-service/internal/core/service"
+	"product-service/utils/validator"
+
+	"github.com/go-playground/validator/v10/translations/en"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+func RunServer() {
+	cfg := config.NewConfig()
+	db, err := cfg.ConnectionPostgres()
+	if err != nil {
+		log.Fatalf("[RunServer-1] %v", err)
+		return
+	}
+
+	productRepo := repository.NewProductRepository(db.DB)
+	productService := service.NewProductService(productRepo)
+
+	e := echo.New()
+	e.Use(middleware.CORS())
+
+	customValidator := validator.NewValidator()
+	en.RegisterDefaultTranslations(customValidator.Validator, customValidator.Translator)
+	e.Validator = customValidator
+
+	handler.NewProductHandler(e, productService, cfg)
+
+	go func() {
+		port := cfg.App.AppPort
+		if port == "" {
+			port = "8081" // Default port untuk product-service
+		}
+		err = e.Start(":" + port)
+		if err != nil {
+			log.Fatalf("[RunServer-2] %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	log.Print("[RunServer-3] Shutting down product-service...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	e.Shutdown(ctx)
+}
+
+package entity
+
+type ProductEntity struct {
+	ID       int64   `json:"id"`
+	Name     string  `json:"name"`
+	Category string  `json:"category"`
+	Price    float64 `json:"price"`
+	Stock    int     `json:"stock"`
+	Unit     string  `json:"unit"`
+	Image    string  `json:"image"`
+	Rating   float64 `json:"rating"`
+}
+package model
+
+import "time"
+
+type Product struct {
+	ID        int64   `gorm:"primaryKey"`
+	Name      string  `gorm:"type:varchar(255);not null"`
+	Category  string  `gorm:"type:varchar(100);not null"`
+	Price     float64 `gorm:"type:decimal(10,2);not null"`
+	Stock     int     `gorm:"not null"`
+	Unit      string  `gorm:"type:varchar(50)"`
+	Image     string  `gorm:"type:varchar(255)"`
+	Rating    float64 `gorm:"type:decimal(2,1);default:0.0"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `gorm:"index"`
+}
+package service
+
+import (
+	"context"
+	"product-service/internal/adapter/repository"
+	"product-service/internal/core/domain/entity"
+)
+
+type ProductServiceInterface interface {
+	GetAllProducts(ctx context.Context) ([]entity.ProductEntity, error)
+	GetProductByID(ctx context.Context, id int64) (*entity.ProductEntity, error)
+	ReduceStock(ctx context.Context, id int64, quantity int) error
+	CreateProduct(ctx context.Context, req entity.ProductEntity) error
+}
+
+type productService struct {
+	repo repository.ProductRepositoryInterface
+}
+
+func NewProductService(repo repository.ProductRepositoryInterface) ProductServiceInterface {
+	return &productService{repo: repo}
+}
+
+func (s *productService) GetAllProducts(ctx context.Context) ([]entity.ProductEntity, error) {
+	return s.repo.GetAllProducts(ctx)
+}
+
+func (s *productService) GetProductByID(ctx context.Context, id int64) (*entity.ProductEntity, error) {
+	return s.repo.GetProductByID(ctx, id)
+}
+
+func (s *productService) ReduceStock(ctx context.Context, id int64, quantity int) error {
+	return s.repo.ReduceStock(ctx, id, quantity)
+}
+
+func (s *productService) CreateProduct(ctx context.Context, req entity.ProductEntity) error {
+	return s.repo.CreateProduct(ctx, req)
+}
+package validator
+
+import (
+	"errors"
+
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	enTranslations "github.com/go-playground/validator/v10/translations/en"
+	"github.com/labstack/gommon/log"
+)
+
+type Validator struct {
+	Validator  *validator.Validate
+	Translator ut.Translator
+}
+
+func NewValidator() *Validator {
+	validate := validator.New()
+
+	// Inisialisasi Translator Bahasa Inggris
+	english := en.New()
+	uni := ut.New(english, english)
+	trans, _ := uni.GetTranslator("en")
+
+	// Daftarkan translation bawaan ke validator
+	_ = enTranslations.RegisterDefaultTranslations(validate, trans)
+
+	return &Validator{
+		Validator:  validate,
+		Translator: trans,
+	}
+}
+
+func (v *Validator) Validate(i interface{}) error {
+	err := v.Validator.Struct(i)
+	if err != nil {
+		if errs, ok := err.(validator.ValidationErrors); ok {
+			for _, e := range errs {
+				log.Infof("[Validator] Error: %s", e.Error())
+				return errors.New(e.Translate(v.Translator))
+			}
+		}
+		return err
+	}
+	return nil
+}
+package main
+
+import "product-service/cmd"
+
+func main() {
+	cmd.Execute()
+}
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+)
+
+var cfgFile string
+
+var rootCmd = &cobra.Command{
+	Use:   "sayur-api",
+	Short: "this api for sayur",
+}
+
+func Execute() {
+	cobra.CheckErr(rootCmd.Execute())
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is .env)")
+	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	rootCmd.AddCommand(startCmd)
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		viper.SetConfigFile(".env")
+	}
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	}
+}
+package cmd
+
+import (
+	"user-service/internal/app"
+
+	"github.com/spf13/cobra"
+)
+
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "start",
+	Long: `start`,
+	Run: func(cmd *cobra.Command, args []string) {
+		app.RunServer()
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(startCmd)
+}
+package config
+
+import "github.com/spf13/viper"
+
+type App struct {
+	AppPort string `json:"app_port"`
+	AppEnv  string `json:"app_env"`
+
+	JwtSecretKey string `json:"jwt_secret_key"`
+	JwtIssuer    string `json:"jwt_issuer"`
+
+}
+
+type PsqlDB struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Dbname   string `json:"db_name"`
+	DBmaxOpen int    `json:"db_max_open"`
+	DBmaxIdle int    `json:"db_max_idle"`
+}
+
+type RabbitMQ struct {
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+}
+
+type Config struct {
+	App  App  `json:"app"`
+	Psql PsqlDB `json:"psql"`
+	RabbitMQ RabbitMQ `json:"rabbitmq"`
+}
+
+func NewConfig() *Config {
+	return &Config{
+		App: App{
+			AppPort: viper.GetString("APP_PORT"),
+			AppEnv:  viper.GetString("APP_ENV"),
+
+			JwtSecretKey: viper.GetString("JWT_SECRET_KEY"),
+			JwtIssuer:    viper.GetString("JWT_ISSUER"),
+		},
+		Psql: PsqlDB{
+			Host:     viper.GetString("DATABASE_HOST"),
+			Port:     viper.GetString("DATABASE_PORT"),
+			User:     viper.GetString("DATABASE_USER"),
+			Password: viper.GetString("DATABASE_PASSWORD"),
+			Dbname:   viper.GetString("DATABASE_NAME"),
+			DBmaxOpen: viper.GetInt("DATABASE_MAX_OPEN_CONNECTIONS"),
+			DBmaxIdle: viper.GetInt("DATABASE_MAX_IDLE_CONNECTIONS"),
+		},
+		RabbitMQ: RabbitMQ{
+			Host:     viper.GetString("RABBITMQ_HOST"),
+			Port:     viper.GetString("RABBITMQ_PORT"),
+			User:     viper.GetString("RABBITMQ_USER"),
+			Password: viper.GetString("RABBITMQ_PASSWORD"),
+		},
+
+	}
+
+}
+
+package config
+
+import (
+	"fmt"
+	"user-service/database/seeds"
+	"user-service/internal/core/domain/model"
+
+	"github.com/rs/zerolog/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+type Postgres struct {
+	DB *gorm.DB
+}
+
+func (cfg Config) ConnectionPostgres() (*Postgres, error) {
+	dbConnString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.Psql.User,
+		cfg.Psql.Password,
+		cfg.Psql.Host,
+		cfg.Psql.Port,
+		cfg.Psql.Dbname,
+	)
+
+	db, err := gorm.Open(postgres.Open(dbConnString), &gorm.Config{})
+	if err != nil {
+		log.Error().Err(err).Msg("[ConnectionPostgres-1] Failed to connect to Postgres database on " + cfg.Psql.Host)
+		return nil, err
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Error().Err(err).Msg("[ConnectionPostgres-2] Failed to get database connection")
+		return nil, err
+	}
+
+	db.Exec(`CREATE TABLE IF NOT EXISTS roles (id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE NOT NULL, created_at TIMESTAMP WITH TIME ZONE, updated_at TIMESTAMP WITH TIME ZONE, deleted_at TIMESTAMP WITH TIME ZONE);`)
+	db.Exec(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255) UNIQUE, password VARCHAR(255), address TEXT, phone VARCHAR(50), photo VARCHAR(255), lat VARCHAR(50), lng VARCHAR(50), is_verified BOOLEAN DEFAULT FALSE, created_at TIMESTAMP WITH TIME ZONE, updated_at TIMESTAMP WITH TIME ZONE, deleted_at TIMESTAMP WITH TIME ZONE);`)
+	db.Exec(`CREATE TABLE IF NOT EXISTS user_role (user_id INT, role_id INT, PRIMARY KEY (user_id, role_id));`)
+	if err := db.AutoMigrate(&model.User{}, &model.VerificationToken{}); err != nil {
+		log.Error().Err(err).Msg("[ConnectionPostgres-3] Failed to migrate user tables")
+		return nil, err
+	}
+
+	seeds.SeedRoles(db)
+	seeds.SeedAdmin(db)
+
+	sqlDB.SetMaxOpenConns(cfg.Psql.DBmaxOpen)
+	sqlDB.SetMaxIdleConns(cfg.Psql.DBmaxIdle)
+
+	return &Postgres{DB: db}, nil
+}
+package config
+
+import (
+	"fmt"
+
+	"github.com/streadway/amqp"
+)
+
+func (cfg Config) NewRabbitMQ() (*amqp.Connection, error) {
+	// default user pass => guest
+	//localhost:5672
+	url := fmt.Sprintf("amqp://%s:%s@%s:%s/", cfg.RabbitMQ.User, cfg.RabbitMQ.Password, cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
+	conn, err := amqp.Dial(url)
+	if err != nil {
+		fmt.Printf("[RabbitMQ-1] Failed to connect to RabbitMQ: %v", err)
+		return nil, err
+	}
+
+	return conn, nil
+}
+package config
+
+import (
+	"context"
+	"fmt"
+	"github.com/go-redis/redis/v8"
+	"os"
+)
+
+var Ctx = context.Background()
+
+func NewRedisClient() *redis.Client {
+	host := os.Getenv("REDIS_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port := os.Getenv("REDIS_PORT")
+	if port == "" {
+		port = "6379"
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr: fmt.Sprintf("%s:%s", host, port),
+	})
+
+	//memastikan redis terhubung
+	_, err := client.Ping(Ctx).Result()
+	if err != nil {
+		panic(err)
+	}
+
+	return client
+}
+package seeds
+
+import (
+	"log"
+	"user-service/internal/core/domain/model"
+	"user-service/utils/conv"
+
+	"gorm.io/gorm"
+)
+
+func SeedAdmin(db *gorm.DB) {
+	bytes, err := conv.HashPassword("admin123")
+	if err != nil {
+		log.Fatalf("%s: %v", err.Error(), err)
+	}
+
+	modelRole := model.Role{}
+	err = db.Where("name = ?", "Super Admin").First(&modelRole).Error
+	if err != nil {
+		log.Fatalf("%s: %v", err.Error(), err)
+	}
+
+	admin := model.User{
+		Name:       "SuperAdmin",
+		Email:      "superadmin@gmail.com",
+		Password:	string(bytes),
+		IsVerified: true,
+		Roles:      []model.Role{modelRole},
+	}
+
+	if err := db.FirstOrCreate(&admin, model.User{Email: "superadmin@gmail.com"}).Error; err != nil {
+		log.Fatalf("%s: %v", err.Error(), err)
+	} else {
+		log.Printf("Admin '%s' created", admin.Name)
+	}
+}
+package seeds
+
+import (
+	"log"
+	"user-service/internal/core/domain/model"
+
+	"gorm.io/gorm"
+)
+
+func SeedRoles(db *gorm.DB) {
+	roles := []model.Role{
+		{Name: "Super Admin"},
+		{Name: "Customer"},
+	}
+
+	for _, role := range roles {
+		if err := db.FirstOrCreate(&role, model.Role{Name: role.Name}).Error; err != nil {
+			log.Fatalf("%s: %v", err.Error(), err)
+		} else {
+			log.Printf("Role '%s' created", role.Name)
+		}
+	}
+}
+
+package request
+
+type SignInRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"min=8,required"`
+	
+}
+
+type SignUpRequest struct {
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
+	PasswordConfirmation string `json:"password_confirmation" validate:"required,min=8"`
+}
+
+package response
+
+type DefaultResponse struct {
+	Massage string `json:"message"`
+	Data interface{} `json:"data"`
+}
+package response
+
+type SignInResponse struct {
+	AccessToken string `json:"access_token"`
+	Role 		string `json:"role"`
+	ID			int64  `json:"id"`
+	Name		string `json:"name"`
+	Email		string `json:"email"`
+	Phone		string `json:"phone"`
+	Photo		string `json:"photo"`
+	Lat			string `json:"lat"`
+	Lng			string `json:"lng"`
+}
+package handler
+
+import (
+	"net/http"
+	"user-service/config"
+	"user-service/internal/adapter"
+	"user-service/internal/adapter/handler/request"
+	"user-service/internal/adapter/handler/response"
+	"user-service/internal/core/domain/entity"
+	"user-service/internal/core/service"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
+)
+
+type UserHandlerInterface interface {
+	SignIn(c echo.Context) error
+	CreateUserAccount(c echo.Context) error
+}
+
+type userHandler struct {
+	userService service.UserServiceInterface
+}
+
+// CreateUserAccount implements [UserHandlerInterface].
+func (u *userHandler) CreateUserAccount(c echo.Context) error {
+	var (
+		req        = request.SignUpRequest{}
+		resp       = response.DefaultResponse{}
+		ctx        = c.Request().Context()
+	)
+
+	if err = c.Bind(&req); err != nil {
+		log.Errorf("[UserHandler-1] CreateUserAccount: %v", err)
+		resp.Massage = err.Error()
+		resp.Data = nil
+		return c.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	if err = c.Validate(&req); err != nil {
+		log.Errorf("[UserHandler-2] CreateUserAccount: %v", err)
+		resp.Massage = err.Error()
+		resp.Data = nil
+		return c.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	if req.Password != req.PasswordConfirmation {
+		log.Errorf("[UserHandler-3] CreateUserAccount: %s", "password not match")
+		resp.Massage = "password not match"
+		resp.Data = nil
+		return c.JSON(http.StatusBadRequest, resp)
+	}
+
+	reqEntity := entity.UserEntity{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	err = u.userService.CreateUserAccount(ctx, reqEntity)
+	if err != nil {
+		log.Errorf("[UserHandler-4] CreateUserAccount: %v", err)
+		resp.Massage = err.Error()
+		resp.Data = nil
+		return c.JSON(http.StatusInternalServerError, resp)
+	}
+
+	resp.Massage = "success"
+	resp.Data = nil
+	return c.JSON(http.StatusCreated, resp)
+
+}
+
+var err error
+
+// SignInHandler implements [UserHandlerInterface].
+func (u *userHandler) SignIn(c echo.Context) error {
+	var (
+		req        = request.SignInRequest{}
+		resp       = response.DefaultResponse{}
+		respSignIn = response.SignInResponse{}
+		ctx        = c.Request().Context()
+	)
+
+	if err = c.Bind(&req); err != nil {
+		log.Errorf("[UserHandler-1] SignIn: %v", err)
+		resp.Massage = err.Error()
+		resp.Data = nil
+		return c.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	if err = c.Validate(&req); err != nil {
+		log.Errorf("[UserHandler-2] SignIn: %v", err)
+		resp.Massage = err.Error()
+		resp.Data = nil
+		return c.JSON(http.StatusUnprocessableEntity, resp)
+	}
+
+	reqEntity := entity.UserEntity{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+	user, token, err := u.userService.SignIn(ctx, reqEntity)
+	if err != nil {
+		if err.Error() == "404" {
+			log.Errorf("[UserHandler-3] SignIn: %s", "user not found")
+			resp.Massage = "user not found"
+			resp.Data = nil
+			return c.JSON(http.StatusNotFound, resp)
+		}
+		log.Errorf("[UserHandler-4] SignIn: %v", err)
+		resp.Massage = err.Error()
+		resp.Data = nil
+		return c.JSON(http.StatusInternalServerError, resp)
+
+	}
+
+	respSignIn.ID = user.ID
+	respSignIn.Name = user.Name
+	respSignIn.Email = user.Email
+	respSignIn.Role = user.RoleName
+	respSignIn.Lat = user.Lat
+	respSignIn.Lng = user.Lng
+	respSignIn.Phone = user.Phone
+	respSignIn.AccessToken = token
+
+	resp.Massage = "success"
+	resp.Data = respSignIn
+
+	return c.JSON(http.StatusOK, resp)
+
+}
+
+func NewUserHandler(e *echo.Echo, userService service.UserServiceInterface, cfg *config.Config) UserHandlerInterface {
+	userHandler := &userHandler{userService: userService}
+
+	e.Use(middleware.Recover())
+	e.POST("/signin", userHandler.SignIn)
+	e.POST("/signup", userHandler.CreateUserAccount)
+
+	mid := adapter.NewMiddlewareAdapter(cfg)
+	adminGroup := e.Group("/admin", mid.CheckToken())
+	adminGroup.GET("/check", func(c echo.Context) error {
+		return c.String(200, "OK")
+	})
+
+	return userHandler
+}
+package massage
+
+import (
+	"encoding/json"
+	"user-service/config"
+
+	"github.com/labstack/gommon/log"
+	"github.com/streadway/amqp"
+)
+
+func PublishMassage(email, massage, notif_type string) error {
+	conn, err := config.NewConfig().NewRabbitMQ()
+	if err != nil {
+		log.Errorf("[PublishMassage-1] Failed to connect to RabbitMQ: %v", err)
+		return err
+	}
+
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Errorf("[PublishMassage-2] Failed to open a channel: %v", err)
+		return err
+	}
+
+	defer ch.Close()
+
+	queue, err := ch.QueueDeclare(
+		notif_type,
+		true,  
+		false, 
+		false, 
+		false,
+		nil,  
+	)
+
+	if err != nil {
+		log.Errorf("[PublishMassage-3] Failed to declare a queue: %v", err)
+		return err
+	}
+
+	notification := map[string]string{
+		"email": email,
+		"massage": massage,
+	}
+
+	body, err := json.Marshal(notification)
+	if err != nil {
+		log.Errorf("[PublishMassage-4] Failed to marshal notification: %v", err)
+		return err
+	}
+
+	return ch.Publish(
+		"",
+		queue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		},
+	)
+
+
+}
+package repository
+
+import (
+	"context"
+	"errors"
+	"time"
+	"user-service/internal/core/domain/entity"
+	"user-service/internal/core/domain/model"
+
+	"github.com/labstack/gommon/log"
+
+	"gorm.io/gorm"
+)
+
+type UserRepositoryInterface interface {
+	GetUserByEmail(ctx context.Context, email string) (*entity.UserEntity, error)
+	CreateUserAccount(ctx context.Context, req entity.UserEntity) error
+}
+
+type userRepository struct {
+	db *gorm.DB
+}
+
+// CreateUserAccount implements [UserRepositoryInterface].
+func (u *userRepository) CreateUserAccount(ctx context.Context, req entity.UserEntity) error {
+	modelUser := model.User{
+		Name:       req.Name,
+		Email:      req.Email,
+		Password:   req.Password,
+		IsVerified: true,
+	}
+
+	if err := u.db.Create(&modelUser).Error; err != nil {
+		log.Errorf("[UserRepository-1] CreateUserAccount: %v", err)
+		return err
+	}
+
+	currentTime := time.Now()
+	modelVerify := model.VerificationToken{
+		UserID:    modelUser.ID,
+		Token:     req.Token,
+		TokenType: "email_verification",
+		ExpiresAt: currentTime.Add(time.Hour * 1),
+	}
+
+	if err := u.db.Create(&modelVerify).Error; err != nil {
+		log.Errorf("[UserRepository-2] CreateUserAccount: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// GetUserByEmail implements [UserRepositoryInterface].
+func (u *userRepository) GetUserByEmail(ctx context.Context, email string) (*entity.UserEntity, error) {
+	modelUser := model.User{}
+
+	if err := u.db.Where("email = ? AND is_verified = ?", email, true).
+		Preload("Roles").First(&modelUser).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			err = errors.New("404")
+			log.Infof("[UserRepository-1] GetUserByEmail: User not found")
+			return nil, err
+		}
+
+		log.Errorf("[UserRepository-1] GetUserByEmail: %v", err)
+		return nil, err
+	}
+
+	// ✅ Ambil nama role secara aman jika slice Roles terisi
+	roleName := ""
+	if len(modelUser.Roles) > 0 {
+		roleName = modelUser.Roles[0].Name
+	}
+
+	return &entity.UserEntity{
+		ID:         modelUser.ID,
+		Name:       modelUser.Name,
+		Email:      email,
+		Password:   modelUser.Password,
+		RoleName:   roleName,
+		Address:    modelUser.Address,
+		Lat:        modelUser.Lat,
+		Lng:        modelUser.Lng,
+		Phone:      modelUser.Phone,
+		Photo:      modelUser.Photo,
+		IsVerified: modelUser.IsVerified,
+	}, nil
+
+}
+func NewUserRepository(db *gorm.DB) UserRepositoryInterface {
+	return &userRepository{db: db}
+
+}
+package adapter
+
+import (
+	"net/http"
+	"strings"
+	"user-service/config"
+	"user-service/internal/adapter/handler/response"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
+)
+
+type MiddlewareAdapterInterface interface {
+	CheckToken() echo.MiddlewareFunc
+}
+
+type middlewareAdapter struct {
+	cfg *config.Config
+}
+
+func (m *middlewareAdapter) CheckToken() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			respErr := response.DefaultResponse{}
+			redisConn := config.NewRedisClient()
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader == "" {
+				log.Errorf("[MiddlewareAdapter-1] CheckToken: %s", "Missing or invalid token")
+				respErr.Massage = "missing or invalid token"
+				respErr.Data = nil
+				return c.JSON(http.StatusUnauthorized, respErr)
+			}
+			tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+			getSession, err := redisConn.HGetAll(c.Request().Context(), tokenString).Result()
+			if err != nil || len(getSession) == 0 {
+				log.Errorf("[MiddlewareAdapter-2] CheckToken: %s", err)
+				respErr.Massage = err.Error()
+				respErr.Data = nil
+				return c.JSON(http.StatusUnauthorized, respErr)
+			}
+			c.Set("user", getSession)
+			return next(c)
+		}
+	}
+}
+
+func NewMiddlewareAdapter(cfg *config.Config) MiddlewareAdapterInterface {
+	return &middlewareAdapter{
+		cfg: cfg,
+		
+	}
+}
+package app
+
+import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+	"user-service/config"
+	"user-service/internal/adapter/handler"
+	"user-service/internal/adapter/repository"
+	"user-service/internal/core/service"
+	"user-service/utils/validator"
+
+	"github.com/go-playground/validator/v10/translations/en"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+func RunServer() {
+	cfg := config.NewConfig()
+	db, err := cfg.ConnectionPostgres()
+	if err != nil {
+		log.Fatalf("[RunServer-1] %v", err)
+		return
+	}
+
+	userRepo := repository.NewUserRepository(db.DB)
+
+	jwtService := service.NewJwtService(cfg)
+	userService := service.NewUserService(userRepo, cfg, jwtService)
+
+	e := echo.New()
+	e.Use(middleware.CORS())
+
+	customValidator := validator.NewValidator()
+	en.RegisterDefaultTranslations(customValidator.Validator, customValidator.Translator)
+	e.Validator = customValidator
+
+	e.GET("/api/check", func(c echo.Context) error {
+		return c.String(200, "OK")
+		})
+
+	handler.NewUserHandler(e, userService, cfg)
+
+	go func ()  {
+		if cfg.App.AppPort == "" {
+			cfg.App.AppPort = os.Getenv("APP_PORT")
+		}
+		err = e.Start(":" + cfg.App.AppPort)
+		if err != nil {
+			log.Fatalf("[RunServer-2] %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, syscall.SIGTERM)
+
+	<-quit
+
+	log.Print("[RunServer-3] Shutting down server of 5 second...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	e.Shutdown(ctx)
+}
+package entity
+
+type UserEntity struct {
+	ID		 int64
+	Name	 string
+	Email	 string
+	Password string
+	Phone	 string
+	Photo	 string
+	RoleName string
+	Address	 string
+	Lat		 string
+	Lng		 string
+	IsVerified bool
+	Token	 string
+}
+
+package entity
+
+import "time"
+
+type VerificationTokenEntity struct {
+	ID        int64     `gorm:"primaryKey"`
+	UserID    int64     `gorm:"index"`
+	Token     string  
+	TokenType string    
+	ExpiresAt time.Time
+	User	  UserEntity
+
+}
+package model
+
+import "time"
+
+type Role struct {
+	ID			int64 `gorm:"primaryKey"`
+	Name		string
+	Users		[]User `gorm:"many2many:user_role;"`
+	CreatedAt	time.Time
+	UpdatedAt	time.Time
+	DeletedAt	*time.Time
+}
+
+package model
+
+import "time"
+
+type User struct {
+	ID         int64      `gorm:"primaryKey"`
+	Name       string
+	Email      string     `gorm:"unique;not null"`
+	Password   string    `gorm:"type:text;not null"`
+	Address    string
+	Phone      string
+	Photo      string
+	Lat        string
+	Lng        string
+	IsVerified bool       `gorm:"default:false"` 
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	DeletedAt  *time.Time
+	Roles      []Role     `gorm:"many2many:user_role;"` 
+}
+package model
+
+import "time"
+
+type UserRole struct {
+	ID			int64 `gorm:"primaryKey"`
+	RoleID		int64 `gorm:"primaryKey"`
+	UserID		int64 `gorm:"primaryKey"`
+	CreatedAt	time.Time
+	UpdatedAt	time.Time
+	DeletedAt	*time.Time
+
+}
+
+type Tabler interface {
+	TableName() string
+}
+
+func (UserRole) TableName() string {
+    return "user_roles"
+}
+package model
+
+import "time"
+
+type VerificationToken struct {
+	ID        int64     `gorm:"primaryKey"`
+	UserID    int64     `gorm:"index"`
+	Token     string  
+	TokenType string    
+	ExpiresAt time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time 
+	User	  User `gorm:"foreignKey:UserID"`
+}
+package service
+
+import (
+	"time"
+	"user-service/config"
+
+	"github.com/dgrijalva/jwt-go"
+)
+
+type JwtServiceInterface interface {
+	GenerateToken(userID int64) (string, error)
+	ValidateToken(token string) (*jwt.Token, error)
+}
+
+type jwtService struct {
+	secretKey string
+	issuer    string
+}
+
+// GenerateToken implements [JwtServiceInterface].
+func (j *jwtService) GenerateToken(userID int64) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"iss":  j.issuer,
+		"exp":  time.Now().Add(time.Hour * 24).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(j.secretKey))
+}
+
+// ValidateToken implements [JwtServiceInterface].
+func (j *jwtService) ValidateToken(encodetoken string) (*jwt.Token, error) {
+	return jwt.Parse(encodetoken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+}
+
+		return []byte(j.secretKey), nil
+	})
+}
+
+func NewJwtService(cfg *config.Config) JwtServiceInterface {
+	return &jwtService{
+		secretKey: cfg.App.JwtSecretKey,
+		issuer:    cfg.App.JwtIssuer,
+	}
+}
+package service
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+	"user-service/config"
+	"user-service/internal/adapter/massage"
+	"user-service/internal/adapter/repository"
+	"user-service/internal/core/domain/entity"
+	"user-service/utils/conv"
+
+	"github.com/google/uuid"
+
+	"github.com/labstack/gommon/log"
+)
+
+type UserServiceInterface interface {
+	SignIn(ctx context.Context, req entity.UserEntity) (*entity.UserEntity, string, error)
+	CreateUserAccount(ctx context.Context, req entity.UserEntity) error
+}
+
+type userService struct {
+	repo       repository.UserRepositoryInterface
+	cfg        *config.Config
+	jwtService JwtServiceInterface
+}
+
+// CreateUserAccount implements [UserServiceInterface].
+func (u *userService) CreateUserAccount(ctx context.Context, req entity.UserEntity) error {
+	password, err := conv.HashPassword(req.Password)
+	if err != nil {
+		log.Errorf("[UserService-1] CreateUserAccount: %v", err)
+		return err
+	}
+	req.Password = password
+	token := uuid.New().String()
+	req.Token = token
+
+	err = u.repo.CreateUserAccount(ctx, req)
+	if err != nil {
+		log.Errorf("[UserService-2] CreateUserAccount: %v", err)
+		return err
+	}
+
+	urlVerify := fmt.Sprintf("http://localhost:8080/verify?token=%v", req.Token)
+	massageparam := fmt.Sprintf("Please verify your account with click link below:%v", urlVerify)
+	err = massage.PublishMassage(req.Email, massageparam, "email_verification")
+	if err != nil {
+		log.Errorf("[UserService-3] CreateUserAccount: %v", err)
+		return err
+	}		
+
+	return nil
+
+}
+
+// SignIn implements [UserServiceInterface].
+func (u *userService) SignIn(ctx context.Context, req entity.UserEntity) (*entity.UserEntity, string, error) {
+	user, err := u.repo.GetUserByEmail(ctx, req.Email)
+	if err != nil {
+		log.Errorf("[UserService-1] SignIn: %v", err)
+		return nil, "", err
+	}
+
+	if checkPass := conv.CheckPasswordHash(req.Password, user.Password); !checkPass {
+		err = errors.New("password is incorrect")
+		log.Errorf("[UserService-2] SignIn: %v", err)
+		return nil, "", err
+	}
+
+	token, err := u.jwtService.GenerateToken(user.ID)
+	if err != nil {
+		log.Errorf("[UserService-3] SignIn: %v", err)
+		return nil, "", err
+	}
+
+	sessionData := map[string]interface{}{
+		"user_id":    user.ID,
+		"name":       user.Name,
+		"email":      user.Email,
+		"logged_in":  "true",
+		"created_at": time.Now().String(),
+		"token":      token,
+	}
+
+	redisConn := config.NewRedisClient()
+	err = redisConn.HSet(ctx, token, sessionData).Err()
+	if err != nil {
+		log.Errorf("[UserService-4] SignIn: %v", err)
+		return nil, "", err
+	}
+
+	return user, token, nil
+
+}
+
+func NewUserService(repo repository.UserRepositoryInterface, cfg *config.Config, jwtService JwtServiceInterface) UserServiceInterface {
+	return &userService{
+		repo:       repo,
+		cfg:        cfg,
+		jwtService: jwtService,
+	}
+}
+package conv
+
+import "golang.org/x/crypto/bcrypt"
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+package validator
+
+import (
+	"errors"
+
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/gommon/log"
+)
+
+type Validator struct {
+	Validator *validator.Validate
+	Translator ut.Translator
+}
+
+func NewValidator() *Validator {
+	en := en.New()
+	uni := ut.New(en, en)
+	trans, found := uni.GetTranslator("en")
+	if !found {
+		log.Fatalf("[Validator-1] NewValidator: Translator not found")
+	}
+
+	validate := validator.New()
+
+	return &Validator{
+		Validator: validate,
+		Translator: trans,
+	}
+}
+
+func (v *Validator) Validate(i interface{}) error {
+	err := v.Validator.Struct(i)
+	
+	if err != nil {
+		objects := err.(validator.ValidationErrors)
+		for _, e := range objects {
+			log.Infof("[Validator-1] Validate: %s", e.Translate(v.Translator))
+
+			return errors.New(e.Translate(v.Translator))
+		}
+	}
+	return nil
+}
+package main
+
+import "user-service/cmd"
+
+func main() {
+	cmd.Execute()
+}
