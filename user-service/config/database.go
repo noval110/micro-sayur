@@ -35,10 +35,7 @@ func (cfg Config) ConnectionPostgres() (*Postgres, error) {
 		return nil, err
 	}
 
-	db.Exec(`CREATE TABLE IF NOT EXISTS roles (id SERIAL PRIMARY KEY, name VARCHAR(255) UNIQUE NOT NULL, created_at TIMESTAMP WITH TIME ZONE, updated_at TIMESTAMP WITH TIME ZONE, deleted_at TIMESTAMP WITH TIME ZONE);`)
-	db.Exec(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255) UNIQUE, password VARCHAR(255), address TEXT, phone VARCHAR(50), photo VARCHAR(255), lat VARCHAR(50), lng VARCHAR(50), is_verified BOOLEAN DEFAULT FALSE, created_at TIMESTAMP WITH TIME ZONE, updated_at TIMESTAMP WITH TIME ZONE, deleted_at TIMESTAMP WITH TIME ZONE);`)
-	db.Exec(`CREATE TABLE IF NOT EXISTS user_role (user_id INT, role_id INT, PRIMARY KEY (user_id, role_id));`)
-	if err := db.AutoMigrate(&model.User{}, &model.VerificationToken{}); err != nil {
+	if err := db.AutoMigrate(&model.Role{}, &model.User{}, &model.VerificationToken{}); err != nil {
 		log.Error().Err(err).Msg("[ConnectionPostgres-3] Failed to migrate user tables")
 		return nil, err
 	}

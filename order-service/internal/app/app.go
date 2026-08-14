@@ -31,6 +31,7 @@ func StartApp() {
 
 	// Setup Echo
 	e := echo.New()
+	e.Use(middleware.CORS())
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Validator = validator.NewCustomValidator()

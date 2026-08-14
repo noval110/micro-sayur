@@ -30,6 +30,11 @@ func (u *userRepository) CreateUserAccount(ctx context.Context, req entity.UserE
 		IsVerified: true,
 	}
 
+	var customerRole model.Role
+	if err := u.db.Where("name = ?", "Customer").First(&customerRole).Error; err == nil {
+		modelUser.Roles = []model.Role{customerRole}
+	}
+
 	if err := u.db.Create(&modelUser).Error; err != nil {
 		log.Errorf("[UserRepository-1] CreateUserAccount: %v", err)
 		return err

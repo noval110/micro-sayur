@@ -31,8 +31,8 @@ func (r *orderRepository) CreateOrder(ctx context.Context, order *domain.Order) 
 	}
 	defer tx.Rollback()
 
-	queryOrder := `INSERT INTO orders (user_id, total_price, status) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at`
-	err = tx.QueryRowContext(ctx, queryOrder, order.UserID, order.TotalPrice, "PENDING").Scan(&order.ID, &order.CreatedAt, &order.UpdatedAt)
+	queryOrder := `INSERT INTO orders (user_id, total_price, status, delivery_address, delivery_notes) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at, updated_at`
+	err = tx.QueryRowContext(ctx, queryOrder, order.UserID, order.TotalPrice, "PENDING", order.DeliveryAddress, order.DeliveryNotes).Scan(&order.ID, &order.CreatedAt, &order.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (r *orderRepository) CreateOrder(ctx context.Context, order *domain.Order) 
 }
 
 func (r *orderRepository) GetAllOrders(ctx context.Context) ([]domain.Order, error) {
-	query := `SELECT id, user_id, total_price, status, created_at, updated_at FROM orders ORDER BY id DESC`
+	query := `SELECT id, user_id, total_price, status, delivery_address, delivery_notes, created_at, updated_at FROM orders ORDER BY id DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (r *orderRepository) GetAllOrders(ctx context.Context) ([]domain.Order, err
 	var orders []domain.Order
 	for rows.Next() {
 		var order domain.Order
-		if err := rows.Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt); err != nil {
+		if err := rows.Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status, &order.DeliveryAddress, &order.DeliveryNotes, &order.CreatedAt, &order.UpdatedAt); err != nil {
 			return nil, err
 		}
 		orders = append(orders, order)
@@ -76,8 +76,8 @@ func (r *orderRepository) GetAllOrders(ctx context.Context) ([]domain.Order, err
 
 func (r *orderRepository) GetOrderByID(ctx context.Context, id int) (*domain.Order, error) {
 	var order domain.Order
-	queryOrder := `SELECT id, user_id, total_price, status, created_at, updated_at FROM orders WHERE id = $1`
-	if err := r.db.QueryRowContext(ctx, queryOrder, id).Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status, &order.CreatedAt, &order.UpdatedAt); err != nil {
+	queryOrder := `SELECT id, user_id, total_price, status, delivery_address, delivery_notes, created_at, updated_at FROM orders WHERE id = $1`
+	if err := r.db.QueryRowContext(ctx, queryOrder, id).Scan(&order.ID, &order.UserID, &order.TotalPrice, &order.Status, &order.DeliveryAddress, &order.DeliveryNotes, &order.CreatedAt, &order.UpdatedAt); err != nil {
 		return nil, err
 	}
 

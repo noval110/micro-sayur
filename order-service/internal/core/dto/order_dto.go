@@ -8,6 +8,8 @@ type CreateOrderItemRequest struct {
 }
 
 type CreateOrderRequest struct {
-	UserID int                      `json:"user_id" validate:"required"`
-	Items  []CreateOrderItemRequest `json:"items" validate:"required,dive"`
+	UserID          int                      `json:"user_id" validate:"required"`
+	DeliveryAddress string                   `json:"delivery_address"`
+	DeliveryNotes   string                   `json:"delivery_notes"`
+	Items           []CreateOrderItemRequest `json:"items" validate:"required,dive"`
 }

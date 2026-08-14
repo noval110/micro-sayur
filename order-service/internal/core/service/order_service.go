@@ -53,10 +53,12 @@ func (s *orderService) CreateOrder(ctx context.Context, req dto.CreateOrderReque
 	}
 
 	order := &domain.Order{
-		UserID:     req.UserID,
-		TotalPrice: totalPrice,
-		Status:     "PENDING",
-		Items:      orderItems,
+		UserID:          req.UserID,
+		TotalPrice:      totalPrice,
+		Status:          "PENDING",
+		DeliveryAddress: req.DeliveryAddress,
+		DeliveryNotes:   req.DeliveryNotes,
+		Items:           orderItems,
 	}
 
 	if err := s.repo.CreateOrder(ctx, order); err != nil {
