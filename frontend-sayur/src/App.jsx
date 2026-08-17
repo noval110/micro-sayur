@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
@@ -15,15 +16,23 @@ import Profile from './pages/Profile';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import AdminLayout from './pages/AdminLayout';
-import Dashboard from './pages/admin/Dashboard';
-import Products from './pages/admin/Products';
-import Orders from './pages/admin/Orders';
-import Users from './pages/admin/Users';
+import Dashboard from './pages/Admin/Dashboard';
+import Products from './pages/Admin/Products';
+import Orders from './pages/Admin/Orders';
+import Users from './pages/Admin/Users';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <AuthProvider>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            marginTop: '70px',
+          },
+        }}
+      />
       <CartProvider>
         <BrowserRouter>
           <Routes>

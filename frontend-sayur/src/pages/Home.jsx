@@ -349,9 +349,6 @@ export default function Home() {
         )
     });
 
-    showToast(
-      `${product.name} ditambahkan ke keranjang.`
-    );
   };
 
 
