@@ -1,1 +1,20 @@
+# Environment / secrets
 .env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+
+# Go
+*.exe
+*.out
+bin/
+
+# Runtime uploads
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
