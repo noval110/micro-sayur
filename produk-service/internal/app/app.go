@@ -20,6 +20,10 @@ import (
 )
 
 func RunServer() {
+	if os.Getenv("INTERNAL_SERVICE_KEY") == "" {
+		log.Fatal("INTERNAL_SERVICE_KEY wajib diisi")
+	}
+
 	cfg := config.NewConfig()
 	db, err := cfg.ConnectionPostgres()
 	if err != nil {
@@ -59,4 +63,3 @@ func RunServer() {
 	defer cancel()
 	e.Shutdown(ctx)
 }
-

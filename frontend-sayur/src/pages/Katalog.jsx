@@ -1,128 +1,646 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { IconSearch, IconFilter, IconPackage } from '@tabler/icons-react';
-import { useSearchParams } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import api from '../api';
+import React, {
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
+
+import {
+  useLocation,
+  useNavigate
+} from 'react-router-dom';
+
 import Navbar from '../components/Navbar';
+import api from '../api';
+import { useCart } from '../context/CartContext';
+
+import {
+  IconChevronDown,
+  IconLoader2,
+  IconPackage,
+  IconPlus,
+  IconSearch,
+  IconStar
+} from '@tabler/icons-react';
+
 import './Katalog.css';
 
+const FALLBACK_IMG =
+  'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80';
+
 export default function Katalog() {
-  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [selectedCategory, setSelectedCategory] = useState('Semua');
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] =
+    useState('Semua');
+
+  const [sortBy, setSortBy] =
+    useState('default');
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState('');
+
   const { addToCart } = useCart();
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // ==========================================
+  // READ URL PARAM
+  // ==========================================
+
   useEffect(() => {
-    // Fetch products
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get('/products');
-        const resData = res.data;
-        const listData = Array.isArray(resData) ? resData : (resData?.data || []);
-        setProducts(listData);
-      } catch (err) {
-        console.error("Gagal mengambil data produk:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
+    const params =
+      new URLSearchParams(location.search);
+
+    const categoryParam =
+      params.get('category');
+
+    const searchParam =
+      params.get('search');
+
+    setSelectedCategory(
+      categoryParam || 'Semua'
+    );
+
+    setSearchTerm(
+      searchParam || ''
+    );
+  }, [location.search]);
+
+  // ==========================================
+  // FETCH PRODUCTS
+  // ==========================================
+
+  useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Filter products based on search query and category
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      const matchCategory = selectedCategory === 'Semua' || product.category === selectedCategory;
-      const matchSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCategory && matchSearch;
-    });
-  }, [products, searchQuery, selectedCategory]);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError('');
 
-  const categories = ['Semua', 'Sayuran', 'Buah', 'Bumbu'];
+      const response =
+        await api.get('/products');
+
+      const backendData =
+        Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+
+      setProducts(
+        Array.isArray(backendData)
+          ? backendData
+          : []
+      );
+    } catch (err) {
+      console.error(
+        'Gagal mengambil produk:',
+        err.response?.data || err
+      );
+
+      setProducts([]);
+
+      setError(
+        'Produk belum dapat dimuat. Silakan coba lagi.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // DYNAMIC CATEGORIES
+  // ==========================================
+
+  const categories = useMemo(() => {
+    const uniqueCategories = [
+      ...new Set(
+        products
+          .map((product) =>
+            String(
+              product.category || ''
+            ).trim()
+          )
+          .filter(Boolean)
+      )
+    ];
+
+    return [
+      'Semua',
+      ...uniqueCategories
+    ];
+  }, [products]);
+
+  // ==========================================
+  // FILTER + SORT
+  // ==========================================
+
+  const filteredProducts = useMemo(() => {
+    const keyword =
+      searchTerm.trim().toLowerCase();
+
+    let result = products.filter(
+      (product) => {
+        const name = String(
+          product.name || ''
+        ).toLowerCase();
+
+        const category = String(
+          product.category || ''
+        );
+
+        const matchSearch =
+          name.includes(keyword);
+
+        const matchCategory =
+          selectedCategory === 'Semua' ||
+          category === selectedCategory;
+
+        return (
+          matchSearch &&
+          matchCategory
+        );
+      }
+    );
+
+    if (sortBy === 'price-low') {
+      result = [...result].sort(
+        (a, b) =>
+          Number(a.price || 0) -
+          Number(b.price || 0)
+      );
+    }
+
+    if (sortBy === 'price-high') {
+      result = [...result].sort(
+        (a, b) =>
+          Number(b.price || 0) -
+          Number(a.price || 0)
+      );
+    }
+
+    if (sortBy === 'name') {
+      result = [...result].sort(
+        (a, b) =>
+          String(a.name || '').localeCompare(
+            String(b.name || ''),
+            'id'
+          )
+      );
+    }
+
+    if (sortBy === 'stock') {
+      result = [...result].sort(
+        (a, b) =>
+          Number(b.stock || 0) -
+          Number(a.stock || 0)
+      );
+    }
+
+    return result;
+  }, [
+    products,
+    searchTerm,
+    selectedCategory,
+    sortBy
+  ]);
+
+  // ==========================================
+  // CATEGORY
+  // ==========================================
+
+  const handleCategoryChange = (
+    category
+  ) => {
+    setSelectedCategory(category);
+
+    const params =
+      new URLSearchParams();
+
+    if (
+      category &&
+      category !== 'Semua'
+    ) {
+      params.set(
+        'category',
+        category
+      );
+    }
+
+    if (searchTerm.trim()) {
+      params.set(
+        'search',
+        searchTerm.trim()
+      );
+    }
+
+    const query =
+      params.toString();
+
+    navigate(
+      query
+        ? `/katalog?${query}`
+        : '/katalog'
+    );
+  };
+
+  // ==========================================
+  // SEARCH
+  // ==========================================
+
+  const handleSearchChange = (e) => {
+    const value =
+      e.target.value;
+
+    setSearchTerm(value);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+
+    const params =
+      new URLSearchParams();
+
+    if (
+      selectedCategory !== 'Semua'
+    ) {
+      params.set(
+        'category',
+        selectedCategory
+      );
+    }
+
+    if (searchTerm.trim()) {
+      params.set(
+        'search',
+        searchTerm.trim()
+      );
+    }
+
+    const query =
+      params.toString();
+
+    navigate(
+      query
+        ? `/katalog?${query}`
+        : '/katalog'
+    );
+  };
+
+  // ==========================================
+  // CART
+  // ==========================================
+
+  const handleAddToCart = (
+    product
+  ) => {
+    const stock =
+      Number(product.stock || 0);
+
+    if (stock <= 0) {
+      return;
+    }
+
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price:
+        Number(product.price || 0),
+
+      image:
+        product.image ||
+        FALLBACK_IMG,
+
+      unit:
+        product.unit ||
+        'kg',
+
+      stock
+    });
+  };
 
   return (
-    <div className="page-wrapper">
+    <div className="katalog-page">
       <Navbar />
-      
-      <main className="katalog-page container">
-        <div className="katalog-header">
-          <div className="katalog-title">
-            <h1>Katalog Produk</h1>
-            <p>Pilih dari ratusan bahan pangan segar berkualitas dari petani lokal.</p>
+
+      <main className="katalog-container">
+
+        {/* HEADER */}
+
+        <section className="katalog-top">
+          <div className="katalog-heading">
+            <span className="katalog-eyebrow">
+              Produk Sayur-day
+            </span>
+
+            <h1>
+              Katalog Produk
+            </h1>
+
+            <p>
+              Temukan kebutuhan segar
+              untuk belanja harianmu.
+            </p>
           </div>
-          
-          <div className="katalog-controls">
-            <div className="search-bar">
-              <IconSearch size={20} className="search-icon" />
-              <input 
-                type="text" 
-                placeholder="Cari sayur, buah, atau bumbu..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+
+          <form
+            className="katalog-search"
+            onSubmit={
+              handleSearchSubmit
+            }
+          >
+            <IconSearch
+              size={18}
+            />
+
+            <input
+              type="text"
+              placeholder="Cari produk..."
+              value={searchTerm}
+              onChange={
+                handleSearchChange
+              }
+            />
+
+            <button type="submit">
+              Cari
+            </button>
+          </form>
+        </section>
+
+        {/* FILTER */}
+
+        <section className="katalog-toolbar">
+          <div className="katalog-category-list">
+            {categories.map(
+              (category) => (
+                <button
+                  key={category}
+                  type="button"
+                  className={
+                    selectedCategory ===
+                    category
+                      ? 'katalog-category-btn active'
+                      : 'katalog-category-btn'
+                  }
+                  onClick={() =>
+                    handleCategoryChange(
+                      category
+                    )
+                  }
+                >
+                  {category}
+                </button>
+              )
+            )}
+          </div>
+
+          <div className="katalog-sort-wrap">
+            <span>
+              Urutkan
+            </span>
+
+            <div className="katalog-select-wrap">
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(
+                    e.target.value
+                  )
+                }
+              >
+                <option value="default">
+                  Default
+                </option>
+
+                <option value="price-low">
+                  Harga Terendah
+                </option>
+
+                <option value="price-high">
+                  Harga Tertinggi
+                </option>
+
+                <option value="name">
+                  Nama A-Z
+                </option>
+
+                <option value="stock">
+                  Stok Terbanyak
+                </option>
+              </select>
+
+              <IconChevronDown
+                size={15}
               />
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="category-filters">
-          <IconFilter size={20} color="var(--text-gray)" />
-          <div className="category-chips">
-            {categories.map(cat => (
-              <button 
-                key={cat} 
-                className={`category-chip ${selectedCategory === cat ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* RESULT INFO */}
+
+        {!loading &&
+          !error && (
+            <div className="katalog-result-info">
+              <strong>
+                {
+                  filteredProducts.length
+                }
+              </strong>
+
+              <span>
+                produk ditemukan
+              </span>
+
+              {searchTerm && (
+                <span>
+                  untuk "{searchTerm}"
+                </span>
+              )}
+            </div>
+          )}
+
+        {/* CONTENT */}
 
         {loading ? (
-          <div className="text-center text-gray mt-xl">Memuat produk...</div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="empty-state card">
-            <IconPackage size={64} color="var(--text-gray)" />
-            <h3>Oops, produk tidak ditemukan!</h3>
-            <p>Coba gunakan kata kunci lain atau ubah filter kategori.</p>
-            <button className="btn btn-outline mt-md" onClick={() => { setSearchQuery(''); setSelectedCategory('Semua'); }}>
-              Reset Filter
-            </button>
+          <div className="katalog-state">
+            <IconLoader2
+              size={30}
+              className="katalog-spin"
+            />
+
+            <span>
+              Memuat produk...
+            </span>
+          </div>
+        ) : error ? (
+          <div className="katalog-error">
+            <IconPackage
+              size={30}
+            />
+
+            <div>
+              <strong>
+                Produk tidak dapat dimuat
+              </strong>
+
+              <p>
+                {error}
+              </p>
+
+              <button
+                type="button"
+                onClick={
+                  fetchProducts
+                }
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        ) : filteredProducts.length ===
+          0 ? (
+          <div className="katalog-state">
+            <IconSearch
+              size={30}
+            />
+
+            <strong>
+              Produk tidak ditemukan
+            </strong>
+
+            <span>
+              Coba gunakan kata
+              pencarian atau kategori
+              lain.
+            </span>
           </div>
         ) : (
-          <div className="product-grid">
-            {filteredProducts.map(product => (
-              <div key={product.id} className="product-card card">
-                {product.image ? (
-                  <div className="product-image-wrapper">
-                    <img src={product.image} alt={product.name} className="product-image" loading="lazy" />
-                  </div>
-                ) : (
-                  <div className="product-image-placeholder">
-                    <IconPackage size={64} color="var(--text-gray)" />
-                  </div>
-                )}
-                <div className="product-info">
-                  <span className="product-category">{product.category || 'Umum'}</span>
-                  <h3 className="product-name">{product.name}</h3>
-                  <p className="product-stock">Tersedia: {product.stock || 0} {product.unit || 'pcs'}</p>
-                  
-                  <div className="product-bottom">
-                    <span className="product-price">
-                      Rp {(product.price || 0).toLocaleString('id-ID')}
-                      <span className="product-unit">/{product.unit || 'pcs'}</span>
-                    </span>
-                    <button className="btn btn-primary btn-sm" onClick={() => addToCart(product)}>Beli</button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="katalog-grid">
+            {filteredProducts.map(
+              (product, index) => {
+                const stock =
+                  Number(
+                    product.stock || 0
+                  );
+
+                const soldOut =
+                  stock <= 0;
+
+                return (
+                  <article
+                    key={`katalog-${product.id}-${index}`}
+                    className="katalog-card"
+                  >
+                    <div className="katalog-card-image">
+                      <img
+                        src={
+                          product.image ||
+                          FALLBACK_IMG
+                        }
+                        alt={
+                          product.name
+                        }
+                        onError={(e) => {
+                          e.currentTarget.onerror =
+                            null;
+
+                          e.currentTarget.src =
+                            FALLBACK_IMG;
+                        }}
+                      />
+
+                      <span className="katalog-card-category">
+                        {product.category ||
+                          'Produk'}
+                      </span>
+
+                      {soldOut && (
+                        <span className="katalog-card-soldout">
+                          Stok Habis
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="katalog-card-body">
+                      <span className="katalog-card-subcategory">
+                        {product.category ||
+                          'Produk Segar'}
+                      </span>
+
+                      <h3>
+                        {product.name}
+                      </h3>
+
+                      <div className="katalog-rating">
+                        <IconStar
+                          size={14}
+                          color="#f59e0b"
+                          fill="#f59e0b"
+                        />
+
+                        <strong>
+                          {product.rating ||
+                            '4.8'}
+                        </strong>
+
+                        <span>
+                          Stok {stock}
+                        </span>
+                      </div>
+
+                      <div className="katalog-card-footer">
+                        <div className="katalog-price">
+                          <strong>
+                            Rp{' '}
+                            {Number(
+                              product.price || 0
+                            ).toLocaleString(
+                              'id-ID'
+                            )}
+                          </strong>
+
+                          <span>
+                            /
+                            {product.unit ||
+                              'kg'}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={
+                            soldOut
+                              ? 'katalog-add-btn disabled'
+                              : 'katalog-add-btn'
+                          }
+                          disabled={
+                            soldOut
+                          }
+                          onClick={() =>
+                            handleAddToCart(
+                              product
+                            )
+                          }
+                        >
+                          <IconPlus
+                            size={16}
+                          />
+
+                          {soldOut
+                            ? 'Habis'
+                            : 'Tambah'}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              }
+            )}
           </div>
         )}
       </main>

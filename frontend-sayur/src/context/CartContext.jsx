@@ -2,76 +2,83 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
-export const useCart = () => useContext(CartContext);
-
-export const CartProvider = ({ children }) => {
-  // Try to load from localStorage if available, otherwise empty array
+export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const savedCart = localStorage.getItem('sayur_cart');
-      const parsed = savedCart ? JSON.parse(savedCart) : [];
-      return Array.isArray(parsed) ? parsed : [];
+      const localData = localStorage.getItem('sayur_cart');
+      return localData ? JSON.parse(localData) : [];
     } catch (e) {
       return [];
     }
   });
 
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Save to localStorage whenever cartItems changes
   useEffect(() => {
     localStorage.setItem('sayur_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   const addToCart = (product) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item => 
-          item.id === product.id 
-            ? { ...item, quantity: item.quantity + 1 } 
-            : item
-        );
+    if (!product) return;
+
+    const rawName = String(product.name || product.title || 'produk').trim().toLowerCase();
+    const uniqueKey = `CART-${rawName.replace(/\s+/g, '-')}-${Math.random().toString(36).substring(2, 7)}`;
+
+    setCartItems((prevItems) => {
+      const existingIndex = prevItems.findIndex((item) => {
+        const itemName = String(item.name || '').trim().toLowerCase();
+        return itemName === rawName;
+      });
+
+      if (existingIndex > -1) {
+        const updated = [...prevItems];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: (updated[existingIndex].quantity || 1) + 1
+        };
+        return updated;
       }
-      return [...prev, { ...product, quantity: 1 }];
+
+      return [
+        ...prevItems,
+        {
+          id: product.id && product.id !== 1 ? product.id : uniqueKey,
+          name: product.name || product.title || 'Produk',
+          price: Number(product.price || product.harga || 0),
+          quantity: 1,
+          image: product.image || product.img || '',
+          unit: product.unit || 'kg'
+        }
+      ];
     });
-    setIsCartOpen(true); // Auto open cart when adding
   };
 
   const removeFromCart = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    setCartItems((prev) => prev.filter((item) => String(item.id) !== String(id)));
   };
 
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) {
-      removeFromCart(id);
-      return;
-    }
-    setCartItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
+  const updateQuantity = (id, amount) => {
+    setCartItems((prev) =>
+      prev
+        .map((item) => {
+          if (String(item.id) === String(id)) {
+            const newQty = (item.quantity || 1) + amount;
+            return newQty > 0 ? { ...item, quantity: newQty } : null;
+          }
+          return item;
+        })
+        .filter(Boolean)
     );
   };
 
-  const clearCart = () => setCartItems([]);
-
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+  const clearCart = () => {
+    setCartItems([]);
+    localStorage.removeItem('sayur_cart');
+  };
 
   return (
-    <CartContext.Provider value={{ 
-      cartItems, 
-      addToCart, 
-      removeFromCart, 
-      updateQuantity, 
-      clearCart,
-      cartTotal,
-      cartCount,
-      isCartOpen,
-      setIsCartOpen
-    }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}>
       {children}
     </CartContext.Provider>
   );
-};
+}
+
+export const useCart = () => useContext(CartContext);

@@ -1,88 +1,248 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 )
 
 var ErrOrderNotFound = errors.New("order tidak ditemukan")
 
 type OrderClient interface {
-	GetOrderByID(orderID int) (*Order, error)
-	UpdateOrderStatus(orderID int, status string) error
+	GetOrderByID(int) (*Order, error)
+	UpdateOrderStatus(int, string) error
 }
 
 type Order struct {
 	ID         int     `json:"id"`
+	UserID     int     `json:"user_id"`
 	TotalPrice float64 `json:"total_price"`
 	Status     string  `json:"status"`
 }
 
 type orderClient struct {
-	baseURL    string
-	httpClient *http.Client
+	baseURL     string
+	internalKey string
+	httpClient  *http.Client
 }
 
-func NewOrderClient(baseURL string) OrderClient {
+func NewOrderClient(
+	baseURL,
+	internalKey string,
+) OrderClient {
+
 	return &orderClient{
-		baseURL:    baseURL,
-		httpClient: &http.Client{Timeout: 10 * time.Second},
+		baseURL:     baseURL,
+		internalKey: internalKey,
+
+		httpClient: &http.Client{
+			Timeout: 10 * time.Second,
+		},
 	}
 }
 
-func (c *orderClient) GetOrderByID(orderID int) (*Order, error) {
-	endpoint := fmt.Sprintf("%s/orders/%d", c.baseURL, orderID)
-	resp, err := c.httpClient.Get(endpoint)
+// ==========================================
+// GET ORDER BY ID
+// INTERNAL SERVICE
+// ==========================================
+
+func (c *orderClient) GetOrderByID(
+	orderID int,
+) (*Order, error) {
+
+	url :=
+		fmt.Sprintf(
+			"%s/internal/orders/%d",
+			c.baseURL,
+			orderID,
+		)
+
+	req, err :=
+		http.NewRequest(
+			http.MethodGet,
+			url,
+			nil,
+		)
+
 	if err != nil {
 		return nil, err
 	}
+
+	// Internal authentication
+	req.Header.Set(
+		"X-Internal-Key",
+		c.internalKey,
+	)
+
+	resp, err :=
+		c.httpClient.Do(req)
+
+	if err != nil {
+		return nil,
+			fmt.Errorf(
+				"gagal menghubungi order-service: %w",
+				err,
+			)
+	}
+
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, ErrOrderNotFound
+	// ========================================
+	// NOT FOUND
+	// ========================================
+
+	if resp.StatusCode ==
+		http.StatusNotFound {
+
+		return nil,
+			ErrOrderNotFound
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("gagal mengambil order ID %d: order-service merespons %s", orderID, resp.Status)
+
+	// ========================================
+	// OTHER ERROR
+	// ========================================
+
+	if resp.StatusCode !=
+		http.StatusOK {
+
+		var errorResponse struct {
+			Message string `json:"message"`
+		}
+
+		_ =
+			json.NewDecoder(
+				resp.Body,
+			).Decode(
+				&errorResponse,
+			)
+
+		if errorResponse.Message != "" {
+			return nil,
+				errors.New(
+					errorResponse.Message,
+				)
+		}
+
+		return nil,
+			fmt.Errorf(
+				"order-service merespons %s",
+				resp.Status,
+			)
 	}
+
+	// ========================================
+	// SUCCESS
+	// ========================================
 
 	var response struct {
 		Data Order `json:"data"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, fmt.Errorf("gagal membaca respons order-service: %w", err)
+
+	if err :=
+		json.NewDecoder(
+			resp.Body,
+		).Decode(
+			&response,
+		); err != nil {
+
+		return nil,
+			fmt.Errorf(
+				"gagal membaca response order-service: %w",
+				err,
+			)
 	}
 
 	return &response.Data, nil
 }
 
-func (c *orderClient) UpdateOrderStatus(orderID int, status string) error {
-	endpoint := fmt.Sprintf("%s/orders/%d/status", c.baseURL, orderID)
-	requestURL, err := url.Parse(endpoint)
+// ==========================================
+// UPDATE ORDER STATUS
+// INTERNAL SERVICE
+// ==========================================
+
+func (c *orderClient) UpdateOrderStatus(
+	orderID int,
+	status string,
+) error {
+
+	body, err :=
+		json.Marshal(
+			map[string]string{
+				"status": status,
+			},
+		)
+
 	if err != nil {
 		return err
 	}
 
-	query := requestURL.Query()
-	query.Set("status", status)
-	requestURL.RawQuery = query.Encode()
+	url :=
+		fmt.Sprintf(
+			"%s/internal/orders/%d/status",
+			c.baseURL,
+			orderID,
+		)
 
-	req, err := http.NewRequest(http.MethodPatch, requestURL.String(), nil)
+	req, err :=
+		http.NewRequest(
+			http.MethodPatch,
+			url,
+			bytes.NewBuffer(body),
+		)
+
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.httpClient.Do(req)
+	req.Header.Set(
+		"Content-Type",
+		"application/json",
+	)
+
+	req.Header.Set(
+		"X-Internal-Key",
+		c.internalKey,
+	)
+
+	resp, err :=
+		c.httpClient.Do(req)
+
 	if err != nil {
-		return err
+		return fmt.Errorf(
+			"gagal menghubungi order-service: %w",
+			err,
+		)
 	}
+
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("gagal mengupdate status order ID %d: order-service merespons %s", orderID, resp.Status)
+	if resp.StatusCode !=
+		http.StatusOK {
+
+		var errorResponse struct {
+			Message string `json:"message"`
+		}
+
+		_ =
+			json.NewDecoder(
+				resp.Body,
+			).Decode(
+				&errorResponse,
+			)
+
+		if errorResponse.Message != "" {
+			return errors.New(
+				errorResponse.Message,
+			)
+		}
+
+		return fmt.Errorf(
+			"order-service merespons %s",
+			resp.Status,
+		)
 	}
 
 	return nil

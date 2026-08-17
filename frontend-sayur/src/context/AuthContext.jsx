@@ -1,87 +1,218 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState
+} from 'react';
+
 import api from '../api';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+export const AuthProvider = ({
+  children
+}) => {
+  const [user, setUser] =
+    useState(() => {
+      try {
+        const savedUser =
+          localStorage.getItem(
+            'sayur_user'
+          );
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('sayur_user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
+        return savedUser
+          ? JSON.parse(savedUser)
+          : null;
 
-  const [token, setToken] = useState(() => localStorage.getItem('token') || null);
-
-  // Update local storage when user or token changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('sayur_user', JSON.stringify(user));
-    } else {
-      localStorage.removeItem('sayur_user');
-    }
-    
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-  }, [user, token]);
-
-  const login = async (email, password) => {
-    try {
-      const res = await api.post('/users/signin', { email, password });
-      const authData = res.data.data; // Added back
-      const userData = {
-        id: authData.id,
-        name: authData.name,
-        email: authData.email,
-        role: authData.role,
-        phone: authData.phone,
-        address: "Jl. Contoh No 123" // Placeholder as there's no address from API
-      };
-      
-      setUser(userData);
-      setToken(authData.access_token);
-      
-      return { success: true, role: authData.role };
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Terjadi kesalahan saat login';
-      return { success: false, error: msg };
-    }
-  };
-
-  const register = async (name, email, password, password_confirmation, phone) => {
-    try {
-      const res = await api.post('/users/signup', { name, email, password, password_confirmation, phone });
-      return { success: true };
-    } catch (err) {
-      console.error("REGISTER ERROR:", err);
-      console.error("RESPONSE DATA:", err.response?.data);
-      let msg = err.response?.data?.message || (err.response ? JSON.stringify(err.response.data) : err.message);
-      
-      if (msg.includes('duplicate key value violates unique constraint') || msg.includes('uni_users_email')) {
-        msg = 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.';
+      } catch {
+        return null;
       }
-      
-      return { success: false, error: msg };
+    });
+
+  const [token, setToken] =
+    useState(
+      () =>
+        localStorage.getItem(
+          'sayur_token'
+        ) || ''
+    );
+
+  const [loading, setLoading] =
+    useState(false);
+
+  // ==========================================
+  // LOGIN
+  // ==========================================
+
+  const login = async (
+    email,
+    password
+  ) => {
+    try {
+      setLoading(true);
+
+      const response =
+        await api.post(
+          '/users/signin',
+          {
+            email,
+            password
+          }
+        );
+
+      const responseData =
+        response.data?.data;
+
+      const accessToken =
+        responseData?.access_token;
+
+      if (!accessToken) {
+        throw new Error(
+          'Token login tidak ditemukan dari server.'
+        );
+      }
+
+      const userData = {
+        id: responseData.id,
+        name: responseData.name,
+        email: responseData.email,
+        role: responseData.role,
+        phone: responseData.phone,
+        photo: responseData.photo,
+        lat: responseData.lat,
+        lng: responseData.lng
+      };
+
+      // Simpan ke state
+      setToken(accessToken);
+      setUser(userData);
+
+      // Simpan ke localStorage
+      localStorage.setItem(
+        'sayur_token',
+        accessToken
+      );
+
+      localStorage.setItem(
+        'sayur_user',
+        JSON.stringify(
+          userData
+        )
+      );
+
+      return {
+        success: true,
+        user: userData,
+        token: accessToken
+      };
+
+    } catch (err) {
+      console.error(
+        'Login error:',
+        err.response?.data ||
+          err
+      );
+
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.massage ||
+        err.message ||
+        'Login gagal. Periksa email dan password.';
+
+      throw new Error(message);
+
+    } finally {
+      setLoading(false);
     }
   };
+
+  // ==========================================
+  // REGISTER
+  // ==========================================
+
+  const register = async (
+    name,
+    email,
+    password
+  ) => {
+    try {
+      setLoading(true);
+
+      const response =
+        await api.post(
+          '/users/signup',
+          {
+            name,
+            email,
+            password,
+
+            password_confirmation:
+              password
+          }
+        );
+
+      return response.data;
+
+    } catch (err) {
+      console.error(
+        'Register error:',
+        err.response?.data ||
+          err
+      );
+
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.massage ||
+        err.message ||
+        'Pendaftaran gagal.';
+
+      throw new Error(message);
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================================
+  // LOGOUT
+  // ==========================================
 
   const logout = () => {
     setUser(null);
-    setToken(null);
-    // Clear cart on logout
-    localStorage.removeItem('sayur_cart');
+    setToken('');
+
+    localStorage.removeItem(
+      'sayur_token'
+    );
+
+    localStorage.removeItem(
+      'sayur_user'
+    );
   };
 
+  // ==========================================
+  // AUTH STATE
+  // ==========================================
+
+  const isAuthenticated =
+    Boolean(token);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        isAuthenticated,
+
+        login,
+        register,
+        logout
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () =>
+  useContext(AuthContext);

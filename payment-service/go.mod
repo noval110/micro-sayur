@@ -2,7 +2,10 @@ module payment-service
 
 go 1.26.4
 
-require github.com/labstack/echo/v4 v4.15.4
+require (
+	github.com/labstack/echo/v4 v4.15.4
+	github.com/lib/pq v1.12.3
+)
 
 require (
 	github.com/labstack/gommon v0.5.0 // indirect

@@ -1,241 +1,1155 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+
 .katalog-page {
-  padding-top: var(--space-xl);
-  padding-bottom: var(--space-2xl);
+  --katalog-green: #0aad0a;
+  --katalog-green-dark: #078707;
+  --katalog-green-soft: #efffed;
+
+  --katalog-heading: #21313c;
+  --katalog-text: #5c6c75;
+  --katalog-muted: #889397;
+
+  --katalog-border: #dfe2e1;
+  --katalog-soft-border: #edf0ef;
+
+  min-height: 100vh;
+
+  background:
+    #ffffff;
+
+  color:
+    var(--katalog-heading);
+
+  font-family:
+    'Inter',
+    sans-serif;
 }
 
-.katalog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: var(--space-xl);
-  flex-wrap: wrap;
-  gap: var(--space-lg);
+
+.katalog-page *,
+.katalog-page *::before,
+.katalog-page *::after {
+  box-sizing:
+    border-box;
 }
 
-.katalog-title h1 {
-  font-size: 2.5rem;
-  margin: 0 0 var(--space-xs) 0;
-  color: var(--text-dark);
+
+.katalog-container {
+  max-width:
+    1220px;
+
+  margin:
+    0 auto;
+
+  padding:
+    38px 20px 70px;
 }
 
-.katalog-title p {
-  color: var(--text-gray);
-  margin: 0;
-  font-size: 1.1rem;
+
+/* =========================================
+   HEADER
+========================================= */
+
+.katalog-top {
+  display:
+    flex;
+
+  align-items:
+    flex-end;
+
+  justify-content:
+    space-between;
+
+  gap:
+    30px;
+
+  padding:
+    32px;
+
+  border-radius:
+    14px;
+
+  background:
+    linear-gradient(
+      110deg,
+      #f0f9ec,
+      #f7fced
+    );
+
+  border:
+    1px solid
+    #e4f1dd;
 }
 
-.katalog-controls {
-  flex: 1;
-  max-width: 400px;
-  min-width: 300px;
+
+.katalog-heading {
+  max-width:
+    540px;
 }
 
-.search-bar {
-  display: flex;
-  align-items: center;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  padding: var(--space-sm) var(--space-md);
-  transition: border-color 0.2s, box-shadow 0.2s;
+
+.katalog-eyebrow {
+  display:
+    block;
+
+  margin-bottom:
+    6px;
+
+  color:
+    var(--katalog-green);
+
+  font-size:
+    0.7rem;
+
+  font-weight:
+    800;
+
+  text-transform:
+    uppercase;
+
+  letter-spacing:
+    0.07em;
 }
 
-.search-bar:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+
+.katalog-heading h1 {
+  margin:
+    0;
+
+  color:
+    var(--katalog-heading);
+
+  font-family:
+    'Outfit',
+    sans-serif;
+
+  font-size:
+    2.3rem;
+
+  line-height:
+    1.1;
+
+  letter-spacing:
+    -0.035em;
 }
 
-.search-bar input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  padding-left: var(--space-sm);
-  font-size: 1rem;
-  color: var(--text-dark);
+
+.katalog-heading p {
+  margin:
+    9px 0 0;
+
+  color:
+    var(--katalog-text);
+
+  font-size:
+    0.85rem;
+
+  line-height:
+    1.6;
 }
 
-.category-filters {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-xl);
-  overflow-x: auto;
-  padding-bottom: var(--space-sm); /* for scrollbar space if any */
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.katalog-search {
+  width:
+    min(
+      100%,
+      410px
+    );
+
+  height:
+    48px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  padding:
+    4px 4px 4px 14px;
+
+  background:
+    #ffffff;
+
+  border:
+    1px solid
+    var(--katalog-border);
+
+  border-radius:
+    8px;
+
+  box-shadow:
+    0 5px 16px
+    rgba(
+      33,
+      49,
+      60,
+      0.04
+    );
 }
 
-.category-chips {
-  display: flex;
-  gap: var(--space-sm);
+
+.katalog-search svg {
+  color:
+    var(--katalog-muted);
+
+  flex-shrink:
+    0;
 }
 
-.category-chip {
-  background-color: var(--bg-main);
-  border: 1px solid var(--border-light);
-  color: var(--text-dark);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-full);
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
+
+.katalog-search input {
+  min-width:
+    0;
+
+  flex:
+    1;
+
+  height:
+    100%;
+
+  border:
+    none;
+
+  outline:
+    none;
+
+  padding:
+    0 10px;
+
+  background:
+    transparent;
+
+  color:
+    var(--katalog-heading);
+
+  font-size:
+    0.82rem;
 }
 
-.category-chip:hover {
-  border-color: var(--primary);
-  color: var(--primary);
+
+.katalog-search button {
+  height:
+    38px;
+
+  padding:
+    0 17px;
+
+  border:
+    none;
+
+  border-radius:
+    6px;
+
+  background:
+    var(--katalog-green);
+
+  color:
+    #ffffff;
+
+  font-size:
+    0.75rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color 0.2s ease;
 }
 
-.category-chip.active {
-  background-color: var(--primary);
-  color: white;
-  border-color: var(--primary);
+
+.katalog-search button:hover {
+  background:
+    var(--katalog-green-dark);
 }
 
-.empty-state {
-  text-align: center;
-  padding: var(--space-2xl) var(--space-lg);
-  margin-top: var(--space-xl);
+
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.katalog-toolbar {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  gap:
+    24px;
+
+  margin-top:
+    32px;
+
+  padding-bottom:
+    20px;
+
+  border-bottom:
+    1px solid
+    var(--katalog-soft-border);
 }
 
-.empty-state h3 {
-  margin: var(--space-md) 0 var(--space-xs);
-  color: var(--text-dark);
+
+.katalog-category-list {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    8px;
+
+  overflow-x:
+    auto;
+
+  padding-bottom:
+    3px;
+
+  scrollbar-width:
+    thin;
 }
 
-.empty-state p {
-  color: var(--text-gray);
-  margin: 0;
+
+.katalog-category-btn {
+  flex-shrink:
+    0;
+
+  padding:
+    7px 13px;
+
+  border:
+    1px solid
+    var(--katalog-border);
+
+  border-radius:
+    6px;
+
+  background:
+    #ffffff;
+
+  color:
+    var(--katalog-text);
+
+  font-size:
+    0.72rem;
+
+  font-weight:
+    600;
+
+  cursor:
+    pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
-/* We reuse .product-grid and .product-card from Home.css natively because they are globalized or we can copy/import them. Wait, Home.css is imported in Home.jsx, but we should make sure the grid styles are available here. */
-/* Since they are defined in Home.css, and we import it in Home.jsx, it's safer to copy the grid layout or move it to index.css. */
-/* I will duplicate the grid styles here specifically for Katalog to be safe, or just rely on index.css if I move them later. Let's just define them here to be safe and independent. */
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--space-lg);
+.katalog-category-btn:hover {
+  border-color:
+    var(--katalog-green);
+
+  color:
+    var(--katalog-green);
 }
 
-.product-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+
+.katalog-category-btn.active {
+  border-color:
+    var(--katalog-green);
+
+  background:
+    var(--katalog-green);
+
+  color:
+    #ffffff;
 }
 
-.product-image-wrapper {
-  height: 180px;
-  width: 100%;
-  overflow: hidden;
-  border-bottom: 1px solid var(--border-light);
-  background-color: var(--bg-main);
+
+/* =========================================
+   SORT
+========================================= */
+
+.katalog-sort-wrap {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    9px;
+
+  flex-shrink:
+    0;
 }
 
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-normal);
+
+.katalog-sort-wrap > span {
+  color:
+    var(--katalog-muted);
+
+  font-size:
+    0.7rem;
 }
 
-.product-card:hover .product-image {
-  transform: scale(1.05);
+
+.katalog-select-wrap {
+  min-width:
+    150px;
+
+  position:
+    relative;
+
+  display:
+    flex;
+
+  align-items:
+    center;
 }
 
-.product-info {
-  padding: var(--space-md);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+
+.katalog-select-wrap select {
+  width:
+    100%;
+
+  appearance:
+    none;
+
+  padding:
+    8px 31px 8px 11px;
+
+  border:
+    1px solid
+    var(--katalog-border);
+
+  border-radius:
+    6px;
+
+  outline:
+    none;
+
+  background:
+    #ffffff;
+
+  color:
+    var(--katalog-heading);
+
+  font-size:
+    0.7rem;
+
+  cursor:
+    pointer;
 }
 
-.product-category {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: var(--space-xs);
-  background-color: rgba(34, 197, 94, 0.1);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  display: inline-block;
-  width: fit-content;
+
+.katalog-select-wrap svg {
+  position:
+    absolute;
+
+  right:
+    10px;
+
+  color:
+    var(--katalog-muted);
+
+  pointer-events:
+    none;
 }
 
-.product-name {
-  font-size: 1.1rem;
-  margin: 0 0 var(--space-xs) 0;
-  color: var(--text-dark);
+
+/* =========================================
+   RESULT INFO
+========================================= */
+
+.katalog-result-info {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    5px;
+
+  margin:
+    22px 0 16px;
+
+  color:
+    var(--katalog-muted);
+
+  font-size:
+    0.72rem;
 }
 
-.product-stock {
-  font-size: 0.875rem;
-  color: var(--text-gray);
-  margin: 0 0 var(--space-md) 0;
+
+.katalog-result-info strong {
+  color:
+    var(--katalog-heading);
 }
 
-.product-bottom {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
+
+/* =========================================
+   GRID
+========================================= */
+
+.katalog-grid {
+  display:
+    grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(
+        0,
+        1fr
+      )
+    );
+
+  gap:
+    18px;
 }
 
-.product-bottom .btn {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+
+.katalog-card {
+  min-width:
+    0;
+
+  overflow:
+    hidden;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  border:
+    1px solid
+    var(--katalog-border);
+
+  border-radius:
+    9px;
+
+  background:
+    #ffffff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-.product-price {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--text-dark);
+
+.katalog-card:hover {
+  border-color:
+    #a8dca8;
+
+  box-shadow:
+    0 10px 28px
+    rgba(
+      33,
+      49,
+      60,
+      0.08
+    );
+
+  transform:
+    translateY(-2px);
 }
 
-.product-unit {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-gray);
+
+/* =========================================
+   IMAGE
+========================================= */
+
+.katalog-card-image {
+  height:
+    205px;
+
+  position:
+    relative;
+
+  overflow:
+    hidden;
+
+  margin:
+    10px 10px 0;
+
+  border-radius:
+    7px;
+
+  background:
+    #f8f9fa;
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .katalog-header {
-    flex-direction: column;
-    align-items: stretch;
+
+.katalog-card-image img {
+  width:
+    100%;
+
+  height:
+    100%;
+
+  object-fit:
+    cover;
+
+  transition:
+    transform 0.35s ease;
+}
+
+
+.katalog-card:hover
+.katalog-card-image img {
+  transform:
+    scale(1.04);
+}
+
+
+.katalog-card-category {
+  position:
+    absolute;
+
+  top:
+    9px;
+
+  left:
+    9px;
+
+  padding:
+    4px 8px;
+
+  border-radius:
+    5px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.93
+    );
+
+  color:
+    var(--katalog-heading);
+
+  font-size:
+    0.62rem;
+
+  font-weight:
+    700;
+
+  backdrop-filter:
+    blur(5px);
+}
+
+
+.katalog-card-soldout {
+  position:
+    absolute;
+
+  top:
+    9px;
+
+  right:
+    9px;
+
+  padding:
+    4px 7px;
+
+  border-radius:
+    5px;
+
+  background:
+    #dc3545;
+
+  color:
+    #ffffff;
+
+  font-size:
+    0.61rem;
+
+  font-weight:
+    700;
+}
+
+
+/* =========================================
+   BODY
+========================================= */
+
+.katalog-card-body {
+  min-height:
+    180px;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  padding:
+    13px 14px 14px;
+}
+
+
+.katalog-card-subcategory {
+  color:
+    var(--katalog-muted);
+
+  font-size:
+    0.64rem;
+}
+
+
+.katalog-card-body h3 {
+  min-height:
+    40px;
+
+  margin:
+    5px 0;
+
+  color:
+    var(--katalog-heading);
+
+  font-family:
+    'Outfit',
+    sans-serif;
+
+  font-size:
+    0.92rem;
+
+  font-weight:
+    700;
+
+  line-height:
+    1.35;
+}
+
+
+.katalog-rating {
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    4px;
+
+  color:
+    var(--katalog-muted);
+
+  font-size:
+    0.67rem;
+}
+
+
+.katalog-rating strong {
+  color:
+    #5f6c73;
+}
+
+
+.katalog-rating span {
+  margin-left:
+    3px;
+}
+
+
+/* =========================================
+   PRICE
+========================================= */
+
+.katalog-card-footer {
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    flex-end;
+
+  gap:
+    10px;
+
+  margin-top:
+    auto;
+
+  padding-top:
+    15px;
+}
+
+
+.katalog-price strong {
+  display:
+    block;
+
+  color:
+    var(--katalog-heading);
+
+  font-size:
+    0.9rem;
+}
+
+
+.katalog-price span {
+  color:
+    var(--katalog-muted);
+
+  font-size:
+    0.64rem;
+}
+
+
+.katalog-add-btn {
+  min-height:
+    33px;
+
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    5px;
+
+  padding:
+    0 10px;
+
+  border:
+    none;
+
+  border-radius:
+    6px;
+
+  background:
+    var(--katalog-green);
+
+  color:
+    #ffffff;
+
+  font-size:
+    0.68rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+
+  transition:
+    background-color 0.2s ease;
+}
+
+
+.katalog-add-btn:hover {
+  background:
+    var(--katalog-green-dark);
+}
+
+
+.katalog-add-btn.disabled {
+  background:
+    #adb5bd;
+
+  cursor:
+    not-allowed;
+}
+
+
+/* =========================================
+   STATE
+========================================= */
+
+.katalog-state {
+  min-height:
+    260px;
+
+  display:
+    flex;
+
+  flex-direction:
+    column;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    8px;
+
+  border:
+    1px dashed
+    var(--katalog-border);
+
+  border-radius:
+    10px;
+
+  color:
+    var(--katalog-text);
+
+  text-align:
+    center;
+}
+
+
+.katalog-state strong {
+  color:
+    var(--katalog-heading);
+
+  font-size:
+    0.88rem;
+}
+
+
+.katalog-state span {
+  font-size:
+    0.75rem;
+}
+
+
+.katalog-spin {
+  color:
+    var(--katalog-green);
+
+  animation:
+    katalogSpin 0.8s
+    linear infinite;
+}
+
+
+.katalog-error {
+  min-height:
+    170px;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  gap:
+    16px;
+
+  padding:
+    22px;
+
+  border:
+    1px solid
+    #f4c7c7;
+
+  border-radius:
+    10px;
+
+  background:
+    #fff5f5;
+
+  color:
+    #922b2b;
+}
+
+
+.katalog-error strong {
+  display:
+    block;
+}
+
+
+.katalog-error p {
+  margin:
+    4px 0 10px;
+
+  font-size:
+    0.75rem;
+}
+
+
+.katalog-error button {
+  padding:
+    7px 11px;
+
+  border:
+    none;
+
+  border-radius:
+    5px;
+
+  background:
+    #922b2b;
+
+  color:
+    #ffffff;
+
+  font-size:
+    0.7rem;
+
+  font-weight:
+    700;
+
+  cursor:
+    pointer;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (
+  max-width: 1024px
+) {
+  .katalog-grid {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(
+          0,
+          1fr
+        )
+      );
   }
-  
-  .katalog-title h1 {
-    font-size: 2rem;
-  }
-  
-  .katalog-controls {
-    max-width: 100%;
-    min-width: 100%;
+}
+
+
+@media (
+  max-width: 800px
+) {
+  .katalog-top {
+    align-items:
+      stretch;
+
+    flex-direction:
+      column;
   }
 
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-md);
+  .katalog-search {
+    width:
+      100%;
+
+    max-width:
+      none;
   }
-  
-  .product-image-wrapper {
-    height: 120px;
+
+  .katalog-toolbar {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
   }
-  
-  .product-name {
-    font-size: 1rem;
+
+  .katalog-sort-wrap {
+    width:
+      100%;
+
+    justify-content:
+      space-between;
   }
-  
-  .product-price {
-    font-size: 1rem;
+
+  .katalog-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(
+          0,
+          1fr
+        )
+      );
   }
-  
-  .product-info {
-    padding: var(--space-sm);
+}
+
+
+@media (
+  max-width: 560px
+) {
+  .katalog-container {
+    padding:
+      16px 14px 50px;
+  }
+
+  .katalog-top {
+    padding:
+      24px 20px;
+
+    border-radius:
+      10px;
+  }
+
+  .katalog-heading h1 {
+    font-size:
+      1.9rem;
+  }
+
+  .katalog-toolbar {
+    margin-top:
+      24px;
+  }
+
+  .katalog-grid {
+    gap:
+      10px;
+  }
+
+  .katalog-card-image {
+    height:
+      140px;
+
+    margin:
+      7px 7px 0;
+  }
+
+  .katalog-card-body {
+    min-height:
+      172px;
+
+    padding:
+      10px;
+  }
+
+  .katalog-card-body h3 {
+    font-size:
+      0.78rem;
+  }
+
+  .katalog-card-footer {
+    align-items:
+      flex-start;
+
+    flex-direction:
+      column;
+  }
+
+  .katalog-add-btn {
+    width:
+      100%;
+  }
+}
+
+
+@keyframes katalogSpin {
+  to {
+    transform:
+      rotate(360deg);
   }
 }

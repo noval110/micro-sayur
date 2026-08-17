@@ -1,18 +1,17 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute({ children, adminOnly = false }) {
-  const { isAuthenticated, user } = useAuth();
-  const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
+  // Jika belum login, arahkan ke login
   if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were trying to go to
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && user?.role !== 'admin' && user?.role !== 'Super Admin') {
-    // If route requires admin but user is not admin, redirect to home
+  // Jika route khusus admin, hanya Super Admin yang boleh masuk
+  if (adminOnly && user?.role !== 'Super Admin') {
     return <Navigate to="/" replace />;
   }
 
