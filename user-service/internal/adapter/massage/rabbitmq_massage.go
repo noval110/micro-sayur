@@ -5,7 +5,7 @@ import (
 	"user-service/config"
 
 	"github.com/labstack/gommon/log"
-	"github.com/streadway/amqp"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func PublishMassage(email, massage, notif_type string) error {
@@ -27,11 +27,11 @@ func PublishMassage(email, massage, notif_type string) error {
 
 	queue, err := ch.QueueDeclare(
 		notif_type,
-		true,  
-		false, 
-		false, 
+		true,
 		false,
-		nil,  
+		false,
+		false,
+		nil,
 	)
 
 	if err != nil {
@@ -40,7 +40,7 @@ func PublishMassage(email, massage, notif_type string) error {
 	}
 
 	notification := map[string]string{
-		"email": email,
+		"email":   email,
 		"massage": massage,
 	}
 
@@ -60,6 +60,5 @@ func PublishMassage(email, massage, notif_type string) error {
 			Body:        body,
 		},
 	)
-
 
 }

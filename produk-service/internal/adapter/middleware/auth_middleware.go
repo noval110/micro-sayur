@@ -18,7 +18,7 @@ func NewAuthMiddleware() *AuthMiddleware {
 	userServiceURL := os.Getenv("USER_SERVICE_URL")
 
 	if userServiceURL == "" {
-		userServiceURL = "http://user_service_container:8084"
+		userServiceURL = "http://127.0.0.1:8080"
 	}
 
 	return &AuthMiddleware{

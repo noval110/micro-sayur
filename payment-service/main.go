@@ -22,15 +22,21 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173", "http://localhost:3000"},
+		AllowOrigins: []string{frontendURL, "http://localhost:3000"},
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodOptions},
 		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
 	}))
 
 	orderURL := os.Getenv("ORDER_SERVICE_URL")
 	if orderURL == "" {
-		orderURL = "http://order_service:8082"
+		orderURL = "http://127.0.0.1:8082"
 	}
 	internalKey := os.Getenv("INTERNAL_SERVICE_KEY")
 	if internalKey == "" {

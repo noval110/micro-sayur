@@ -67,6 +67,8 @@ export default function Dashboard() {
       setLoading(true);
       setError('');
 
+      console.log('TOKEN DASHBOARD:', token);
+
       const [
         productResponse,
         orderResponse

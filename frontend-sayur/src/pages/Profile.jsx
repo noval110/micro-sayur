@@ -5,6 +5,8 @@ import React, {
 
 import api from '../api';
 
+import { Link } from 'react-router-dom';
+
 import {
   IconAlertCircle,
   IconCamera,
@@ -321,18 +323,27 @@ export default function Profile() {
       <div className="profile-container">
 
         <header className="profile-header">
-          <span>
-            Akun Saya
-          </span>
+          <div>
+            <span className="profile-eyebrow">
+              Akun Saya
+            </span>
 
-          <h1>
-            Profil Saya
-          </h1>
+            <h1>
+              Profil Saya
+            </h1>
 
-          <p>
-            Kelola informasi pribadi
-            dan alamat pengiriman.
-          </p>
+            <p>
+              Kelola informasi pribadi
+              dan alamat pengiriman.
+            </p>
+          </div>
+
+          <Link
+            to="/"
+            className="profile-back-button"
+          >
+            ← Kembali ke Beranda
+          </Link>
         </header>
 
         <div className="profile-layout">

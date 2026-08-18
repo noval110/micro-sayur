@@ -1,20 +1,29 @@
-# Environment / secrets
+# Environment
 .env
 .env.*
 !.env.example
 
 # Node
 node_modules/
+**/node_modules/
 dist/
+**/dist/
 
-# Go
+# Go temporary cache
+.tmp-go-cache-*/
+.tmp-go-mod-cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Uploads
+uploads/
+**/uploads/
+
+# Build / OS
 *.exe
 *.out
-bin/
-
-# Runtime uploads
-uploads/
-
-# OS
+*.log
 .DS_Store
 Thumbs.db

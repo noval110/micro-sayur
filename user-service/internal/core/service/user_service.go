@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -91,9 +92,15 @@ func (
 		return err
 	}
 
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173"
+	}
+
 	urlVerify :=
 		fmt.Sprintf(
-			"http://localhost:8080/verify?token=%v",
+			"%s/verify?token=%v",
+			strings.TrimRight(frontendURL, "/"),
 			req.Token,
 		)
 

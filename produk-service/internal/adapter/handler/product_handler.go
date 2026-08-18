@@ -569,8 +569,7 @@ func (h *productHandler) UploadProductImage(
 	c echo.Context,
 ) error {
 
-	const maxImageSize =
-		5 * 1024 * 1024
+	const maxImageSize = 5 * 1024 * 1024
 
 	file, err :=
 		c.FormFile(
@@ -770,9 +769,16 @@ func (h *productHandler) UploadProductImage(
 		)
 	}
 
+	baseURL := os.Getenv("PUBLIC_API_URL")
+
+	if baseURL == "" {
+		baseURL = "http://localhost:8000"
+	}
+
 	imageURL :=
 		fmt.Sprintf(
-			"http://localhost:8081/uploads/products/%s",
+			"%s/uploads/products/%s",
+			baseURL,
 			fileName,
 		)
 

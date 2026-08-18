@@ -26,7 +26,7 @@ type AuthResponse struct {
 func NewAuthMiddleware() *AuthMiddleware {
 	url := os.Getenv("USER_SERVICE_URL")
 	if url == "" {
-		url = "http://user_service_container:8084"
+		url = "http://127.0.0.1:8080"
 	}
 	return &AuthMiddleware{userServiceURL: url, client: &http.Client{Timeout: 5 * time.Second}}
 }
