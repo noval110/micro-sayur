@@ -110,6 +110,25 @@ func (u *userHandler) UpdateProfile(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{"message": "profile berhasil diperbarui", "data": profileData(updatedUser)})
 }
 
+func getPublicBaseURL(c echo.Context) string {
+	baseURL := strings.TrimSpace(os.Getenv("PUBLIC_API_URL"))
+
+	if baseURL != "" {
+		return strings.TrimRight(baseURL, "/")
+	}
+
+	host := strings.TrimSpace(c.Request().Host)
+
+	if host != "" &&
+		!strings.Contains(host, "localhost") &&
+		!strings.HasPrefix(host, "127.0.0.1") {
+
+		return "https://" + host
+	}
+
+	return "http://localhost:8000"
+}
+
 func (u *userHandler) UploadProfilePhoto(c echo.Context) error {
 	const maxPhotoSize = 5 * 1024 * 1024
 	if _, err := getSessionUserID(c); err != nil {
@@ -164,7 +183,13 @@ func (u *userHandler) UploadProfilePhoto(c echo.Context) error {
 		_ = os.Remove(destination)
 		return c.JSON(http.StatusBadRequest, echo.Map{"message": "gagal menyimpan foto"})
 	}
-	photoURL := fmt.Sprintf("http://localhost:8000/users/uploads/profiles/%s", fileName)
+	baseURL := getPublicBaseURL(c)
+
+	photoURL := fmt.Sprintf(
+		"%s/users/uploads/profiles/%s",
+		baseURL,
+		fileName,
+	)
 	return c.JSON(http.StatusOK, echo.Map{
 		"message": "foto berhasil diupload",
 		"data":    echo.Map{"url": photoURL},

@@ -17,6 +17,7 @@ import {
 } from '@tabler/icons-react';
 
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 import './CartCheckout.css';
 
@@ -24,6 +25,8 @@ const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&auto=format&fit=crop&q=80';
 
 export default function Cart() {
+  const { isAuthenticated } = useAuth();
+
   const {
     cartItems,
     updateQuantity,
@@ -32,6 +35,19 @@ export default function Cart() {
   } = useCart();
 
   const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      navigate('/login', {
+        state: {
+          from: '/checkout'
+        }
+      });
+      return;
+    }
+
+    navigate('/checkout');
+  };
 
   const items = Array.isArray(cartItems)
     ? cartItems
@@ -393,9 +409,7 @@ export default function Cart() {
                 <button
                   type="button"
                   className="cc-primary-button cc-full-button"
-                  onClick={() =>
-                    navigate('/checkout')
-                  }
+                  onClick={handleCheckout}
                 >
                   Lanjut Checkout
 
