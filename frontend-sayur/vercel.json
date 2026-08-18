@@ -1,40 +1,20 @@
 {
   "rewrites": [
     {
-      "source": "/users",
-      "destination": "https://micro-sayur.onrender.com/users"
-    },
-    {
       "source": "/users/:match*",
       "destination": "https://micro-sayur.onrender.com/users/:match*"
-    },
-    {
-      "source": "/products",
-      "destination": "https://micro-sayur-produk.onrender.com/products"
     },
     {
       "source": "/products/:match*",
       "destination": "https://micro-sayur-produk.onrender.com/products/:match*"
     },
     {
-      "source": "/orders",
-      "destination": "https://micro-sayur-order.onrender.com/orders"
-    },
-    {
       "source": "/orders/:match*",
       "destination": "https://micro-sayur-order.onrender.com/orders/:match*"
     },
     {
-      "source": "/payments",
-      "destination": "https://micro-sayur-payment.onrender.com/payments"
-    },
-    {
       "source": "/payments/:match*",
       "destination": "https://micro-sayur-payment.onrender.com/payments/:match*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
