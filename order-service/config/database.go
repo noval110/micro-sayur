@@ -10,12 +10,15 @@ import (
 )
 
 func InitDB() *sql.DB {
-	host := getEnv("DB_HOST", "127.0.0.1")
-	port := getEnv("DB_PORT", "5432")
-	user := getEnv("DB_USER", "postgres")
-	password := getEnv("DB_PASSWORD", "postgres")
-	database := getEnv("DB_NAME", "sayur_order_db")
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, database)
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		host := getEnv("DB_HOST", "127.0.0.1")
+		port := getEnv("DB_PORT", "5432")
+		user := getEnv("DB_USER", "postgres")
+		password := getEnv("DB_PASSWORD", "postgres")
+		database := getEnv("DB_NAME", "sayur_order_db")
+		dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, database)
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

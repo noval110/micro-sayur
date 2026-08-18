@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
@@ -13,13 +14,16 @@ type Postgres struct {
 }
 
 func (cfg Config) ConnectionPostgres() (*Postgres, error) {
-	dbConnString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.Psql.User,
-		cfg.Psql.Password,
-		cfg.Psql.Host,
-		cfg.Psql.Port,
-		cfg.Psql.Dbname,
-	)
+	dbConnString := os.Getenv("DATABASE_URL")
+	if dbConnString == "" {
+		dbConnString = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+			cfg.Psql.User,
+			cfg.Psql.Password,
+			cfg.Psql.Host,
+			cfg.Psql.Port,
+			cfg.Psql.Dbname,
+		)
+	}
 
 	db, err := gorm.Open(postgres.Open(dbConnString), &gorm.Config{})
 	if err != nil {

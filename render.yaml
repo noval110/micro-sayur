@@ -1,0 +1,62 @@
+services:
+  - type: web
+    name: user-service
+    env: go
+    buildCommand: "cd user-service && go build -o main ."
+    startCommand: "cd user-service && ./main"
+    envVars:
+      - key: APP_PORT
+        value: "8084"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: RABBITMQ_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+
+  - type: web
+    name: product-service
+    env: go
+    buildCommand: "cd produk-service && go build -o main ."
+    startCommand: "cd produk-service && ./main"
+    envVars:
+      - key: APP_PORT
+        value: "8081"
+      - key: DATABASE_URL
+        sync: false
+      - key: INTERNAL_SERVICE_KEY
+        sync: false
+
+  - type: web
+    name: order-service
+    env: go
+    buildCommand: "cd order-service && go build -o main ."
+    startCommand: "cd order-service && ./main"
+    envVars:
+      - key: APP_PORT
+        value: "8082"
+      - key: DATABASE_URL
+        sync: false
+      - key: PRODUCT_SERVICE_URL
+        value: "http://product-service:8081"
+      - key: INTERNAL_SERVICE_KEY
+        sync: false
+
+  - type: web
+    name: payment-service
+    env: go
+    buildCommand: "cd payment-service && go build -o main ."
+    startCommand: "cd payment-service && ./main"
+    envVars:
+      - key: APP_PORT
+        value: "8083"
+      - key: DATABASE_URL
+        sync: false
+      - key: ORDER_SERVICE_URL
+        value: "http://order-service:8082"
+      - key: USER_SERVICE_URL
+        value: "http://user-service:8084"
+      - key: INTERNAL_SERVICE_KEY
+        sync: false

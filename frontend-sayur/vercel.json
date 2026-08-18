@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/users/:match*",
+      "destination": "https://REPLACE_WITH_RENDER_USER_SERVICE_URL/users/:match*"
+    },
+    {
+      "source": "/products/:match*",
+      "destination": "https://REPLACE_WITH_RENDER_PRODUCT_SERVICE_URL/products/:match*"
+    },
+    {
+      "source": "/orders/:match*",
+      "destination": "https://REPLACE_WITH_RENDER_ORDER_SERVICE_URL/orders/:match*"
+    },
+    {
+      "source": "/payments/:match*",
+      "destination": "https://REPLACE_WITH_RENDER_PAYMENT_SERVICE_URL/payments/:match*"
+    }
+  ]
+}
