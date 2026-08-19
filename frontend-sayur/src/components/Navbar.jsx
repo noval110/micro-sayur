@@ -609,6 +609,17 @@ const handleCategory = (
               Katalog
             </NavLink>
 
+            <NavLink
+              to="/about"
+              className={({ isActive }) =>
+                isActive
+                  ? 'navbar-nav-link active'
+                  : 'navbar-nav-link'
+              }
+            >
+              Tentang Kami
+            </NavLink>
+
 
             {isAuthenticated && (
               <NavLink
@@ -687,6 +698,12 @@ const handleCategory = (
               to="/katalog"
             >
               Katalog
+            </NavLink>
+
+            <NavLink
+              to="/about"
+            >
+              Tentang Kami
             </NavLink>
 
 

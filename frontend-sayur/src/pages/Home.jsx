@@ -12,10 +12,6 @@ import {
 import api from '../api';
 
 import {
-  useAuth
-} from '../context/AuthContext';
-
-import {
   useCart
 } from '../context/CartContext';
 
@@ -97,8 +93,6 @@ const formatRupiah = (
 
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
-
   const navigate =
     useNavigate();
 
@@ -1178,54 +1172,6 @@ export default function Home() {
         </div>
 
       </section>
-
-      <footer className="home-footer">
-        <div className="home-footer-main">
-          <div className="home-footer-brand-column">
-            <Link to="/" className="home-footer-logo">
-              <span>
-                <IconLeaf size={20} />
-              </span>
-              Sayur-day
-            </Link>
-
-            <p>
-              Supermarket online untuk kebutuhan bahan dapur segar sehari-hari
-              dengan proses belanja yang praktis.
-            </p>
-          </div>
-
-          <div className="home-footer-column">
-            <h4>Kategori</h4>
-            <Link to="/katalog?category=Buah">Buah-buahan</Link>
-            <Link to="/katalog?category=Sayur">Sayuran</Link>
-            <Link to="/katalog?category=Umbi">Umbi</Link>
-            <Link to="/katalog?category=Bumbu">Bumbu Dapur</Link>
-          </div>
-
-          <div className="home-footer-column">
-            <h4>Akun</h4>
-            <Link to="/profile">Profil Saya</Link>
-            <Link to="/my-orders">Pesanan Saya</Link>
-            <Link to="/cart">Keranjang</Link>
-            <Link to="/katalog">Katalog</Link>
-          </div>
-
-          <div className="home-footer-column">
-            <h4>Bantuan</h4>
-            <Link to="/about">Tentang Kami</Link>
-            <Link to="#">Cara Pembelian</Link>
-            <Link to="#">Pengembalian Barang</Link>
-            <Link to="#">Syarat &amp; Ketentuan</Link>
-            <Link to="#">Kontak Kami</Link>
-          </div>
-        </div>
-
-        <div className="home-footer-bottom">
-          <span>© 2026 Sayur-day. All rights reserved.</span>
-          <span>Sayur segar untuk kebutuhan harianmu.</span>
-        </div>
-      </footer>
 
     </div>
   );

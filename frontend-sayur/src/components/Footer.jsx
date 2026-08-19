@@ -10,7 +10,6 @@ export default function Footer() {
   return (
     <footer className="footer-container">
       <div className="footer-main">
-        {/* BRAND */}
         <div className="footer-brand-column">
           <Link to="/" className="footer-logo">
             <span>
@@ -23,7 +22,6 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* CATEGORY */}
         <div className="footer-column">
           <h4>Kategori</h4>
           <Link to="/katalog?category=Buah">Buah-buahan</Link>
@@ -32,7 +30,6 @@ export default function Footer() {
           <Link to="/katalog?category=Bumbu">Bumbu Dapur</Link>
         </div>
 
-        {/* CUSTOMER */}
         {isAuthenticated && (
           <div className="footer-column">
             <h4>Akun</h4>
@@ -43,9 +40,9 @@ export default function Footer() {
           </div>
         )}
 
-        {/* HELP */}
         <div className="footer-column">
           <h4>Bantuan</h4>
+          <Link to="/about">Tentang Kami</Link>
           <Link to="/how-to-buy">Cara Pembelian</Link>
           <Link to="/returns">Pengembalian Barang</Link>
           <Link to="/terms">Syarat & Ketentuan</Link>
