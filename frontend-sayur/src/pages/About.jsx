@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import './About.css';
 
 const IconTrendingUp = () => (
@@ -141,16 +140,11 @@ const IconCheck = () => (
 export default function About() {
   return (
     <div className="about-page">
-      <Navbar />
-
       <section className="about-hero">
         <div className="about-hero-decoration about-decoration-one" />
         <div className="about-hero-decoration about-decoration-two" />
 
         <div className="about-hero-content">
-          <span className="about-badge">
-            🌱 Tentang Sayur-day
-          </span>
 
           <h1>
             Membawa Pasar Lokal
