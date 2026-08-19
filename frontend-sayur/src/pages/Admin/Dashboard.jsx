@@ -56,13 +56,7 @@ export default function Dashboard() {
     error,
     setError
   ] = useState('');
-
-
-  // =========================================
-  // LOAD DASHBOARD
-  // =========================================
-
-  const loadDashboardStats = async () => {
+const loadDashboardStats = async () => {
     try {
       setLoading(true);
       setError('');
@@ -139,13 +133,7 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboardStats();
   }, [token]);
-
-
-  // =========================================
-  // STATS
-  // =========================================
-
-  const stats =
+const stats =
     useMemo(() => {
       const totalProducts =
         products.length;
@@ -209,13 +197,7 @@ export default function Dashboard() {
       products,
       orders
     ]);
-
-
-  // =========================================
-  // ORDER STATUS SUMMARY
-  // =========================================
-
-  const statusSummary =
+const statusSummary =
     useMemo(() => {
       const countStatus = (
         statuses
@@ -257,13 +239,7 @@ export default function Dashboard() {
           ])
       };
     }, [orders]);
-
-
-  // =========================================
-  // RECENT ORDERS
-  // =========================================
-
-  const recentOrders =
+const recentOrders =
     useMemo(() => {
       return [...orders]
         .sort(
@@ -277,13 +253,7 @@ export default function Dashboard() {
         )
         .slice(0, 5);
     }, [orders]);
-
-
-  // =========================================
-  // HELPERS
-  // =========================================
-
-  const formatRupiah = (
+const formatRupiah = (
     value
   ) =>
     Number(
@@ -403,12 +373,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-page">
-
-      {/* ==================================
-          HEADER
-      ================================== */}
-
-      <header className="dashboard-header">
+<header className="dashboard-header">
 
         <div>
           <span className="dashboard-eyebrow">
@@ -451,13 +416,7 @@ export default function Dashboard() {
         </button>
 
       </header>
-
-
-      {/* ==================================
-          ERROR
-      ================================== */}
-
-      {error && (
+{error && (
         <div className="dashboard-error">
           <IconAlertCircle
             size={19}
@@ -474,13 +433,7 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-
-      {/* ==================================
-          LOADING
-      ================================== */}
-
-      {loading ? (
+{loading ? (
         <div className="dashboard-loading">
           <IconLoader2
             size={30}
@@ -498,12 +451,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-
-          {/* ================================
-              STAT CARDS
-          ================================ */}
-
-          <section className="dashboard-stats">
+<section className="dashboard-stats">
 
             <StatCard
               icon={
@@ -566,17 +514,8 @@ export default function Dashboard() {
             />
 
           </section>
-
-
-          {/* ================================
-              MAIN GRID
-          ================================ */}
-
-          <div className="dashboard-grid">
-
-            {/* ORDER STATUS */}
-
-            <section className="dashboard-card">
+<div className="dashboard-grid">
+<section className="dashboard-card">
 
               <div className="dashboard-card-header">
                 <div>
@@ -672,11 +611,7 @@ export default function Dashboard() {
               </div>
 
             </section>
-
-
-            {/* QUICK ACTION */}
-
-            <section className="dashboard-card">
+<section className="dashboard-card">
 
               <div className="dashboard-card-header">
                 <div>
@@ -753,13 +688,7 @@ export default function Dashboard() {
             </section>
 
           </div>
-
-
-          {/* ================================
-              RECENT ORDERS
-          ================================ */}
-
-          <section className="dashboard-card dashboard-recent">
+<section className="dashboard-card dashboard-recent">
 
             <div className="dashboard-card-header">
               <div>
@@ -883,12 +812,6 @@ export default function Dashboard() {
     </div>
   );
 }
-
-
-// =========================================
-// STAT CARD
-// =========================================
-
 function StatCard({
   icon,
   type,
@@ -932,12 +855,6 @@ function StatCard({
     </article>
   );
 }
-
-
-// =========================================
-// STATUS ITEM
-// =========================================
-
 function StatusItem({
   icon,
   type,

@@ -28,11 +28,6 @@ func NewOrderHandler(
 		orderService: os,
 	}
 }
-
-// ==========================================
-// HELPER: GET USER ID FROM CONTEXT
-// ==========================================
-
 func getUserIDFromContext(
 	c echo.Context,
 ) (int, bool) {
@@ -53,11 +48,6 @@ func getUserIDFromContext(
 
 	return userID, true
 }
-
-// ==========================================
-// CREATE ORDER
-// ==========================================
-
 func (h *OrderHandler) CreateOrder(
 	c echo.Context,
 ) error {
@@ -112,11 +102,6 @@ func (h *OrderHandler) CreateOrder(
 		},
 	)
 }
-
-// ==========================================
-// GET MY ORDERS
-// ==========================================
-
 func (h *OrderHandler) GetMyOrders(
 	c echo.Context,
 ) error {
@@ -157,20 +142,9 @@ func (h *OrderHandler) GetMyOrders(
 		},
 	)
 }
-
-// ==========================================
-// GET MY ORDER BY ID
-// CUSTOMER
-// ==========================================
-
 func (h *OrderHandler) GetMyOrderByID(
 	c echo.Context,
 ) error {
-
-	// ========================================
-	// ORDER ID
-	// ========================================
-
 	id, err :=
 		strconv.Atoi(
 			c.Param("id"),
@@ -184,11 +158,6 @@ func (h *OrderHandler) GetMyOrderByID(
 			},
 		)
 	}
-
-	// ========================================
-	// USER ID FROM TOKEN
-	// ========================================
-
 	userID, ok :=
 		getUserIDFromContext(c)
 
@@ -200,11 +169,6 @@ func (h *OrderHandler) GetMyOrderByID(
 			},
 		)
 	}
-
-	// ========================================
-	// GET ORDER
-	// ========================================
-
 	order, err :=
 		h.orderService.GetOrderByID(
 			c.Request().Context(),
@@ -229,11 +193,6 @@ func (h *OrderHandler) GetMyOrderByID(
 			},
 		)
 	}
-
-	// ========================================
-	// OWNERSHIP CHECK
-	// ========================================
-
 	if order.UserID != userID {
 		return c.JSON(
 			http.StatusForbidden,
@@ -252,12 +211,6 @@ func (h *OrderHandler) GetMyOrderByID(
 		},
 	)
 }
-
-// ==========================================
-// GET ALL ORDERS
-// ADMIN
-// ==========================================
-
 func (h *OrderHandler) GetAllOrders(
 	c echo.Context,
 ) error {
@@ -286,24 +239,12 @@ func (h *OrderHandler) GetAllOrders(
 	)
 }
 
-// ==========================================
-// GET ORDER BY ID
-// INTERNAL SERVICE
-// ==========================================
-//
 // Digunakan oleh:
-//
 // payment-service
-//
 // Route:
-//
 // GET /internal/orders/:id
-//
 // Route ini harus dilindungi
 // X-Internal-Key di app.go.
-//
-// ==========================================
-
 func (h *OrderHandler) GetOrderByID(
 	c echo.Context,
 ) error {
@@ -356,11 +297,6 @@ func (h *OrderHandler) GetOrderByID(
 		},
 	)
 }
-
-// ==========================================
-// UPDATE STATUS
-// ==========================================
-
 func (h *OrderHandler) UpdateOrderStatus(
 	c echo.Context,
 ) error {

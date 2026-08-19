@@ -43,12 +43,6 @@ func NewOrderClient(
 		},
 	}
 }
-
-// ==========================================
-// GET ORDER BY ID
-// INTERNAL SERVICE
-// ==========================================
-
 func (c *orderClient) GetOrderByID(
 	orderID int,
 ) (*Order, error) {
@@ -89,22 +83,12 @@ func (c *orderClient) GetOrderByID(
 	}
 
 	defer resp.Body.Close()
-
-	// ========================================
-	// NOT FOUND
-	// ========================================
-
 	if resp.StatusCode ==
 		http.StatusNotFound {
 
 		return nil,
 			ErrOrderNotFound
 	}
-
-	// ========================================
-	// OTHER ERROR
-	// ========================================
-
 	if resp.StatusCode !=
 		http.StatusOK {
 
@@ -132,11 +116,6 @@ func (c *orderClient) GetOrderByID(
 				resp.Status,
 			)
 	}
-
-	// ========================================
-	// SUCCESS
-	// ========================================
-
 	var response struct {
 		Data Order `json:"data"`
 	}
@@ -157,12 +136,6 @@ func (c *orderClient) GetOrderByID(
 
 	return &response.Data, nil
 }
-
-// ==========================================
-// UPDATE ORDER STATUS
-// INTERNAL SERVICE
-// ==========================================
-
 func (c *orderClient) UpdateOrderStatus(
 	orderID int,
 	status string,

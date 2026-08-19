@@ -195,12 +195,6 @@ func (u *userHandler) UploadProfilePhoto(c echo.Context) error {
 		"data":    echo.Map{"url": photoURL},
 	})
 }
-
-// ==========================================
-// GET ALL USERS
-// ADMIN ONLY
-// ==========================================
-
 func (u *userHandler) GetAllUsers(c echo.Context) error {
 	users, err := u.userService.GetAllUsers(
 		c.Request().Context(),
@@ -250,11 +244,6 @@ func (u *userHandler) GetAllUsers(c echo.Context) error {
 		},
 	)
 }
-
-// ==========================================
-// CREATE USER ACCOUNT
-// ==========================================
-
 func (u *userHandler) CreateUserAccount(c echo.Context) error {
 	var (
 		req  = request.SignUpRequest{}
@@ -343,11 +332,6 @@ func (u *userHandler) CreateUserAccount(c echo.Context) error {
 		resp,
 	)
 }
-
-// ==========================================
-// SIGN IN
-// ==========================================
-
 func (u *userHandler) SignIn(c echo.Context) error {
 	var (
 		req        = request.SignInRequest{}
@@ -445,11 +429,6 @@ func (u *userHandler) SignIn(c echo.Context) error {
 		resp,
 	)
 }
-
-// ==========================================
-// REGISTER ROUTES
-// ==========================================
-
 func NewUserHandler(
 	e *echo.Echo,
 	userService service.UserServiceInterface,
@@ -462,11 +441,6 @@ func NewUserHandler(
 
 	// Recover dari panic
 	e.Use(middleware.Recover())
-
-	// ==========================================
-	// PUBLIC ROUTES
-	// ==========================================
-
 	e.POST(
 		"/signin",
 		userHandler.SignIn,
@@ -476,18 +450,7 @@ func NewUserHandler(
 		"/signup",
 		userHandler.CreateUserAccount,
 	)
-
-	// ==========================================
-	// AUTH MIDDLEWARE
-	// ==========================================
-
 	mid := adapter.NewMiddlewareAdapter(cfg)
-
-	// ==========================================
-	// AUTH CHECK
-	// Semua user yang sudah login boleh akses
-	// ==========================================
-
 	authGroup := e.Group(
 		"/auth",
 		mid.CheckToken(),
@@ -543,12 +506,6 @@ func NewUserHandler(
 		"/uploads",
 		"uploads",
 	)
-
-	// ==========================================
-	// ADMIN ROUTES
-	// Hanya Super Admin
-	// ==========================================
-
 	adminGroup := e.Group(
 		"/admin",
 		mid.CheckToken(),

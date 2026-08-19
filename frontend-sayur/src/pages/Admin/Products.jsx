@@ -65,12 +65,7 @@ export default function Products() {
     categoryFilter,
     setCategoryFilter
   ] = useState('ALL');
-
-  // =========================================
-  // FORM STATE
-  // =========================================
-
-  const [name, setName] =
+const [name, setName] =
     useState('');
 
   const [price, setPrice] =
@@ -101,12 +96,7 @@ export default function Products() {
     existingImage,
     setExistingImage
   ] = useState('');
-
-  // =========================================
-  // LOAD PRODUCTS
-  // =========================================
-
-  const loadProducts = async () => {
+const loadProducts = async () => {
     try {
       setLoading(true);
       setError('');
@@ -142,12 +132,7 @@ export default function Products() {
   useEffect(() => {
     loadProducts();
   }, []);
-
-  // =========================================
-  // CLEAN PREVIEW
-  // =========================================
-
-  useEffect(() => {
+useEffect(() => {
     return () => {
       if (
         imagePreview &&
@@ -159,12 +144,7 @@ export default function Products() {
       }
     };
   }, [imagePreview]);
-
-  // =========================================
-  // TOAST
-  // =========================================
-
-  const showToast = (
+const showToast = (
     message,
     type = 'success'
   ) => {
@@ -180,12 +160,7 @@ export default function Products() {
       3000
     );
   };
-
-  // =========================================
-  // RESET FORM
-  // =========================================
-
-  const resetForm = () => {
+const resetForm = () => {
     if (
       imagePreview &&
       imagePreview.startsWith('blob:')
@@ -208,12 +183,7 @@ export default function Products() {
     setEditingProduct(null);
     setFormMode('create');
   };
-
-  // =========================================
-  // IMAGE
-  // =========================================
-
-  const handleImageChange = (
+const handleImageChange = (
     event
   ) => {
     const file =
@@ -273,24 +243,14 @@ export default function Products() {
     setImageFile(file);
     setImagePreview(preview);
   };
-
-  // =========================================
-  // OPEN CREATE
-  // =========================================
-
-  const openCreateForm = () => {
+const openCreateForm = () => {
     resetForm();
 
     setFormMode('create');
 
     setShowForm(true);
   };
-
-  // =========================================
-  // OPEN EDIT
-  // =========================================
-
-  const openEditForm = (
+const openEditForm = (
     product
   ) => {
     resetForm();
@@ -336,12 +296,7 @@ export default function Products() {
 
     setShowForm(true);
   };
-
-  // =========================================
-  // CLOSE FORM
-  // =========================================
-
-  const closeForm = () => {
+const closeForm = () => {
     if (submitting) {
       return;
     }
@@ -350,12 +305,7 @@ export default function Products() {
 
     setShowForm(false);
   };
-
-  // =========================================
-  // UPLOAD IMAGE
-  // =========================================
-
-  const uploadImage = async () => {
+const uploadImage = async () => {
     if (!imageFile) {
       return existingImage;
     }
@@ -385,12 +335,7 @@ export default function Products() {
 
     return imageURL;
   };
-
-  // =========================================
-  // VALIDATE FORM
-  // =========================================
-
-  const getFormPayload = async () => {
+const getFormPayload = async () => {
     const cleanName =
       name.trim();
 
@@ -478,12 +423,7 @@ export default function Products() {
         imageURL || ''
     };
   };
-
-  // =========================================
-  // SUBMIT CREATE / EDIT
-  // =========================================
-
-  const handleSubmit = async (
+const handleSubmit = async (
     event
   ) => {
     event.preventDefault();
@@ -538,12 +478,7 @@ export default function Products() {
       setSubmitting(false);
     }
   };
-
-  // =========================================
-  // DELETE
-  // =========================================
-
-  const openDeleteModal = (
+const openDeleteModal = (
     product
   ) => {
     setDeleteProduct(
@@ -593,12 +528,7 @@ export default function Products() {
       setDeleting(false);
     }
   };
-
-  // =========================================
-  // CATEGORIES
-  // =========================================
-
-  const categories =
+const categories =
     useMemo(() => {
       const values =
         products
@@ -612,12 +542,7 @@ export default function Products() {
         ...new Set(values)
       ].sort();
     }, [products]);
-
-  // =========================================
-  // FILTER
-  // =========================================
-
-  const filteredProducts =
+const filteredProducts =
     useMemo(() => {
       const keyword =
         search
@@ -652,12 +577,7 @@ export default function Products() {
       search,
       categoryFilter
     ]);
-
-  // =========================================
-  // STATS
-  // =========================================
-
-  const stats =
+const stats =
     useMemo(() => {
       const totalProducts =
         products.length;
@@ -705,12 +625,7 @@ export default function Products() {
         outOfStock
       };
     }, [products]);
-
-  // =========================================
-  // STOCK BADGE
-  // =========================================
-
-  const getStockBadge = (
+const getStockBadge = (
     value
   ) => {
     const amount =
@@ -747,10 +662,7 @@ export default function Products() {
 
   return (
     <div className="products-page">
-
-      {/* TOAST */}
-
-      {toast && (
+{toast && (
         <div
           className={
             toast.type ===
@@ -773,10 +685,7 @@ export default function Products() {
           {toast.message}
         </div>
       )}
-
-      {/* HEADER */}
-
-      <header className="products-header">
+<header className="products-header">
 
         <div>
           <span className="products-eyebrow">
@@ -833,10 +742,7 @@ export default function Products() {
         </div>
 
       </header>
-
-      {/* ERROR */}
-
-      {error && (
+{error && (
         <div className="products-error">
           <IconAlertCircle
             size={19}
@@ -853,10 +759,7 @@ export default function Products() {
           </div>
         </div>
       )}
-
-      {/* STATS */}
-
-      <section className="products-stats">
+<section className="products-stats">
 
         <ProductStat
           title="Total Produk"
@@ -911,10 +814,7 @@ export default function Products() {
         />
 
       </section>
-
-      {/* MAIN CARD */}
-
-      <section className="products-card">
+<section className="products-card">
 
         <div className="products-card-header">
 
@@ -1163,12 +1063,7 @@ export default function Products() {
         )}
 
       </section>
-
-      {/* ===================================
-          CREATE / EDIT MODAL
-      =================================== */}
-
-      {showForm && (
+{showForm && (
         <div
           className="products-modal-backdrop"
           onClick={
@@ -1466,12 +1361,7 @@ export default function Products() {
           </div>
         </div>
       )}
-
-      {/* ===================================
-          DELETE MODAL
-      =================================== */}
-
-      {deleteProduct && (
+{deleteProduct && (
         <div
           className="products-modal-backdrop"
           onClick={
@@ -1556,11 +1446,6 @@ export default function Products() {
     </div>
   );
 }
-
-// =========================================
-// STAT
-// =========================================
-
 function ProductStat({
   title,
   value,

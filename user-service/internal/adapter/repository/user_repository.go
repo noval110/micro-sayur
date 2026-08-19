@@ -43,10 +43,6 @@ type userRepository struct {
 	db *gorm.DB
 }
 
-// ==========================================
-// CREATE USER
-// ==========================================
-
 func (u *userRepository) CreateUserAccount(
 	ctx context.Context,
 	req entity.UserEntity,
@@ -129,11 +125,6 @@ func (u *userRepository) CreateUserAccount(
 
 	return nil
 }
-
-// ==========================================
-// GET USER BY EMAIL
-// ==========================================
-
 func (u *userRepository) GetUserByEmail(
 	ctx context.Context,
 	email string,
@@ -208,12 +199,6 @@ func (u *userRepository) GetUserByEmail(
 		IsVerified: modelUser.IsVerified,
 	}, nil
 }
-
-// ==========================================
-// GET ALL USERS
-// ADMIN
-// ==========================================
-
 func (u *userRepository) GetAllUsers(
 	ctx context.Context,
 ) ([]entity.UserEntity, error) {

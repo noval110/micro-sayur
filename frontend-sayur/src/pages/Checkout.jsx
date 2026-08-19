@@ -52,13 +52,7 @@ export default function Checkout() {
 
   const navigate =
     useNavigate();
-
-
-  // =========================================
-  // FORM
-  // =========================================
-
-  const [
+const [
     address,
     setAddress
   ] = useState(() => {
@@ -83,13 +77,7 @@ export default function Checkout() {
     note,
     setNote
   ] = useState('');
-
-
-  // =========================================
-  // STATE
-  // =========================================
-
-  const [
+const [
     loading,
     setLoading
   ] = useState(false);
@@ -113,13 +101,7 @@ export default function Checkout() {
     createdOrder,
     setCreatedOrder
   ] = useState(null);
-
-
-  // =========================================
-  // PRODUCT ID HELPER
-  // =========================================
-
-  const getProductId = (
+const getProductId = (
     item
   ) => {
     if (!item) {
@@ -167,13 +149,7 @@ export default function Checkout() {
 
     return numericId;
   };
-
-
-  // =========================================
-  // QUANTITY HELPER
-  // =========================================
-
-  const getQuantity = (
+const getQuantity = (
     item
   ) => {
     const quantity =
@@ -193,13 +169,7 @@ export default function Checkout() {
 
     return quantity;
   };
-
-
-  // =========================================
-  // CART ITEMS
-  // =========================================
-
-  const rawItems =
+const rawItems =
     Array.isArray(
       cartItems
     )
@@ -217,13 +187,7 @@ export default function Checkout() {
           item
         ) !== null
     );
-
-
-  // =========================================
-  // AUTH
-  // =========================================
-
-  useEffect(() => {
+useEffect(() => {
     if (!isAuthenticated) {
       navigate(
         '/login',
@@ -236,13 +200,7 @@ export default function Checkout() {
     isAuthenticated,
     navigate
   ]);
-
-
-  // =========================================
-  // GET PROFILE
-  // =========================================
-
-  useEffect(() => {
+useEffect(() => {
     const fetchProfile =
       async () => {
         if (
@@ -325,13 +283,7 @@ export default function Checkout() {
     isAuthenticated,
     user?.name
   ]);
-
-
-  // =========================================
-  // TOTAL
-  // =========================================
-
-  const subtotal =
+const subtotal =
     items.reduce(
       (
         total,
@@ -368,26 +320,14 @@ export default function Checkout() {
   const estimatedTotal =
     subtotal +
     shippingFee;
-
-
-  // =========================================
-  // CREATE ORDER
-  // =========================================
-
-  const handlePlaceOrder =
+const handlePlaceOrder =
     async (
       event
     ) => {
       event.preventDefault();
 
       setError('');
-
-
-      // =====================================
-      // AUTH
-      // =====================================
-
-      if (
+if (
         !isAuthenticated
       ) {
         navigate(
@@ -396,13 +336,7 @@ export default function Checkout() {
 
         return;
       }
-
-
-      // =====================================
-      // CART
-      // =====================================
-
-      if (
+if (
         items.length === 0
       ) {
         setError(
@@ -411,13 +345,7 @@ export default function Checkout() {
 
         return;
       }
-
-
-      // =====================================
-      // ADDRESS
-      // =====================================
-
-      if (
+if (
         !address.trim()
       ) {
         setError(
@@ -426,13 +354,7 @@ export default function Checkout() {
 
         return;
       }
-
-
-      // =====================================
-      // USER ID
-      // =====================================
-
-      const userId =
+const userId =
         Number(
           user?.id ||
           user?.ID
@@ -455,13 +377,7 @@ export default function Checkout() {
 
         return;
       }
-
-
-      // =====================================
-      // ORDER ITEMS
-      // =====================================
-
-      const orderItems =
+const orderItems =
         items.map(
           (item) => ({
             product_id:
@@ -475,13 +391,7 @@ export default function Checkout() {
               )
           })
         );
-
-
-      // =====================================
-      // PAYLOAD
-      // =====================================
-
-      const payload = {
+const payload = {
         user_id:
           userId,
 
@@ -500,13 +410,7 @@ export default function Checkout() {
         'CREATE ORDER PAYLOAD:',
         payload
       );
-
-
-      // =====================================
-      // REQUEST
-      // =====================================
-
-      try {
+try {
         setLoading(true);
 
         const response =
@@ -566,13 +470,7 @@ export default function Checkout() {
         setLoading(false);
       }
     };
-
-
-  // =========================================
-  // SUCCESS
-  // =========================================
-
-  if (createdOrder) {
+if (createdOrder) {
     return (
       <div className="cc-page">
 
@@ -721,13 +619,7 @@ export default function Checkout() {
       </div>
     );
   }
-
-
-  // =========================================
-  // EMPTY / NO VALID PRODUCT
-  // =========================================
-
-  if (
+if (
     items.length === 0 &&
     !createdOrder
   ) {
@@ -777,23 +669,11 @@ export default function Checkout() {
       </div>
     );
   }
-
-
-  // =========================================
-  // CHECKOUT PAGE
-  // =========================================
-
-  return (
+return (
     <div className="cc-page">
 
       <main className="cc-container">
-
-
-        {/* ===================================
-            HEADER
-        =================================== */}
-
-        <div className="cc-page-header">
+<div className="cc-page-header">
 
           <div>
 
@@ -834,20 +714,8 @@ export default function Checkout() {
             handlePlaceOrder
           }
         >
-
-
-          {/* =================================
-              LEFT
-          ================================= */}
-
-          <div className="cc-checkout-main">
-
-
-            {/* ===============================
-                SHIPPING
-            =============================== */}
-
-            <section className="cc-card cc-form-card">
+<div className="cc-checkout-main">
+<section className="cc-card cc-form-card">
 
 
               <div className="cc-card-title-icon">
@@ -872,11 +740,7 @@ export default function Checkout() {
                 </div>
 
               </div>
-
-
-              {/* PROFILE LOADING */}
-
-              {profileLoading && (
+{profileLoading && (
                 <div className="cc-info-box">
 
                   <IconLoader2
@@ -890,11 +754,7 @@ export default function Checkout() {
 
                 </div>
               )}
-
-
-              {/* NAME */}
-
-              <div className="cc-form-group">
+<div className="cc-form-group">
 
                 <label>
 
@@ -919,11 +779,7 @@ export default function Checkout() {
                 />
 
               </div>
-
-
-              {/* PHONE */}
-
-              <div className="cc-form-group">
+<div className="cc-form-group">
 
                 <label>
 
@@ -957,11 +813,7 @@ export default function Checkout() {
                 />
 
               </div>
-
-
-              {/* ADDRESS */}
-
-              <div className="cc-form-group">
+<div className="cc-form-group">
 
                 <label>
                   Alamat Lengkap
@@ -992,11 +844,7 @@ export default function Checkout() {
                 />
 
               </div>
-
-
-              {/* PROFILE INFO */}
-
-              {profileLoaded &&
+{profileLoaded &&
                 (!phone ||
                   !address.trim()) && (
 
@@ -1022,11 +870,7 @@ export default function Checkout() {
                 </div>
 
               )}
-
-
-              {/* NOTE */}
-
-              <div className="cc-form-group">
+<div className="cc-form-group">
 
                 <label>
 
@@ -1061,13 +905,7 @@ export default function Checkout() {
 
 
             </section>
-
-
-            {/* ===============================
-                PRODUCTS
-            =============================== */}
-
-            <section className="cc-card cc-checkout-products">
+<section className="cc-card cc-checkout-products">
 
 
               <div className="cc-card-title-icon">
@@ -1195,13 +1033,7 @@ export default function Checkout() {
 
 
           </div>
-
-
-          {/* =================================
-              RIGHT
-          ================================= */}
-
-          <aside className="cc-sidebar">
+<aside className="cc-sidebar">
 
 
             <section className="cc-card cc-summary">
@@ -1291,20 +1123,12 @@ export default function Checkout() {
                 </strong>
 
               </div>
-
-
-              {/* ERROR */}
-
-              {error && (
+{error && (
                 <div className="cc-error">
                   {error}
                 </div>
               )}
-
-
-              {/* SUBMIT */}
-
-              <button
+<button
                 type="submit"
                 className="cc-primary-button cc-full-button"
                 disabled={

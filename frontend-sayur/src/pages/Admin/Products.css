@@ -1,6 +1,4 @@
-/* ==========================================
-   PAGE
-========================================== */
+/* Page */
 
 .products-page {
   width: 100%;
@@ -10,9 +8,7 @@
   font-family: Inter, sans-serif;
 }
 
-/* ==========================================
-   HEADER
-========================================== */
+/* Header */
 
 .products-header {
   display: flex;
@@ -54,9 +50,7 @@
   gap: 10px;
 }
 
-/* ==========================================
-   HEADER BUTTONS
-========================================== */
+/* Header Buttons */
 
 .products-refresh,
 .products-add-button {
@@ -111,9 +105,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   ERROR
-========================================== */
+/* Error */
 
 .products-error {
   display: flex;
@@ -145,9 +137,7 @@
   font-size: 0.76rem;
 }
 
-/* ==========================================
-   STATS
-========================================== */
+/* Stats */
 
 .products-stats {
   display: grid;
@@ -213,9 +203,7 @@
   font-weight: 800;
 }
 
-/* ==========================================
-   MAIN CARD
-========================================== */
+/* Main Card */
 
 .products-card {
   overflow: hidden;
@@ -254,9 +242,7 @@
   gap: 9px;
 }
 
-/* ==========================================
-   SEARCH
-========================================== */
+/* Search */
 
 .products-search {
   display: flex;
@@ -293,9 +279,7 @@
   color: #9ca8ac;
 }
 
-/* ==========================================
-   FILTER
-========================================== */
+/* Filter */
 
 .products-filter {
   min-height: 42px;
@@ -317,9 +301,7 @@
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
-/* ==========================================
-   TABLE
-========================================== */
+/* Table */
 
 .products-table-wrapper {
   width: 100%;
@@ -367,9 +349,7 @@
   border-bottom: none;
 }
 
-/* ==========================================
-   PRODUCT CELL
-========================================== */
+/* Product Cell */
 
 .products-product-cell {
   display: flex;
@@ -406,9 +386,7 @@
   font-size: 0.7rem;
 }
 
-/* ==========================================
-   CATEGORY
-========================================== */
+/* Category */
 
 .products-category {
   display: inline-flex;
@@ -421,9 +399,7 @@
   font-weight: 700;
 }
 
-/* ==========================================
-   PRICE
-========================================== */
+/* Price */
 
 .products-price {
   color: #21313c;
@@ -432,9 +408,7 @@
   white-space: nowrap;
 }
 
-/* ==========================================
-   STOCK
-========================================== */
+/* Stock */
 
 .products-stock {
   display: inline-flex;
@@ -462,18 +436,14 @@
   color: #c62828;
 }
 
-/* ==========================================
-   ID
-========================================== */
+/* Id */
 
 .products-id {
   color: #879398;
   font-size: 0.74rem;
 }
 
-/* ==========================================
-   ACTION BUTTONS
-========================================== */
+/* Action Buttons */
 
 .products-actions {
   display: flex;
@@ -522,9 +492,7 @@
   transform: scale(0.95);
 }
 
-/* ==========================================
-   STATE
-========================================== */
+/* State */
 
 .products-state {
   display: flex;
@@ -554,9 +522,7 @@
   font-size: 0.76rem;
 }
 
-/* ==========================================
-   MODAL BACKDROP
-========================================== */
+/* Modal Backdrop */
 
 .products-modal-backdrop {
   position: fixed;
@@ -570,9 +536,7 @@
   backdrop-filter: blur(4px);
 }
 
-/* ==========================================
-   PRODUCT FORM MODAL
-========================================== */
+/* Product Form Modal */
 
 .products-modal {
   width: min(100%, 560px);
@@ -649,9 +613,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   FORM
-========================================== */
+/* Form */
 
 .products-form {
   padding: 20px 22px 22px;
@@ -735,9 +697,7 @@
   line-height: 1.4;
 }
 
-/* ==========================================
-   IMAGE PREVIEW
-========================================== */
+/* Image Preview */
 
 .products-preview {
   display: flex;
@@ -764,9 +724,7 @@
   object-fit: cover;
 }
 
-/* ==========================================
-   FORM ACTIONS
-========================================== */
+/* Form Actions */
 
 .products-form-actions {
   display: flex;
@@ -820,9 +778,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   DELETE MODAL
-========================================== */
+/* Delete Modal */
 
 .products-delete-modal {
   width: min(100%, 420px);
@@ -901,9 +857,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   TOAST
-========================================== */
+/* Toast */
 
 .products-toast {
   position: fixed;
@@ -944,9 +898,7 @@
   color: #ffffff;
 }
 
-/* ==========================================
-   ANIMATION
-========================================== */
+/* Animation */
 
 .products-spin {
   animation:
@@ -978,9 +930,7 @@
   }
 }
 
-/* ==========================================
-   SCROLLBAR MODAL
-========================================== */
+/* Scrollbar Modal */
 
 .products-modal::-webkit-scrollbar {
   width: 7px;
@@ -995,9 +945,7 @@
   background: #d8dedd;
 }
 
-/* ==========================================
-   RESPONSIVE - TABLET
-========================================== */
+/* Responsive - Tablet */
 
 @media (max-width: 1100px) {
   .products-stats {
@@ -1023,9 +971,7 @@
   }
 }
 
-/* ==========================================
-   RESPONSIVE - MOBILE
-========================================== */
+/* Responsive - Mobile */
 
 @media (max-width: 700px) {
   .products-header {
@@ -1065,9 +1011,7 @@
   }
 }
 
-/* ==========================================
-   RESPONSIVE - SMALL MOBILE
-========================================== */
+/* Responsive - Small Mobile */
 
 @media (max-width: 520px) {
   .products-page {

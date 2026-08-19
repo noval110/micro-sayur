@@ -43,9 +43,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0 16px;
 }
 
-/* ==========================================
-   ANIMASI HALAMAN SMOOTH (FADE & SLIDE)
-   ========================================== */
+/* Animasi Halaman Smooth (Fade & Slide) */
 .home-page, 
 .katalog-page, 
 .my-orders-page, 
@@ -66,9 +64,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* ==========================================
-   BASE COMPONENTS & BUTTONS
-   ========================================== */
+/* Base Components & Buttons */
 .btn-primary {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: var(--white);
@@ -118,9 +114,7 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(0.96) !important;
 }
 
-/* ==========================================
-   HOVER FLUID UNTUK CARD
-   ========================================== */
+/* Hover Fluid Untuk Card */
 .product-card-fresh, .katalog-card, .category-item {
   transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-smooth), border-color 0.3s ease !important;
 }
@@ -130,9 +124,7 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-md) !important;
 }
 
-/* ==========================================
-   COUNTER & HERO SECTIONS
-   ========================================== */
+/* Counter & Hero Sections */
 .counter {
   font-size: 16px;
   padding: 5px 10px;

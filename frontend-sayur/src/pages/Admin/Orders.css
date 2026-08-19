@@ -6,9 +6,7 @@
   font-family: Inter, sans-serif;
 }
 
-/* ==========================================
-   HEADER
-========================================== */
+/* Header */
 
 .orders-header {
   display: flex;
@@ -79,9 +77,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   SUMMARY
-========================================== */
+/* Summary */
 
 .orders-summary-grid {
   display: grid;
@@ -132,9 +128,7 @@
   white-space: nowrap;
 }
 
-/* ==========================================
-   CONTENT
-========================================== */
+/* Content */
 
 .orders-content-card {
   overflow: hidden;
@@ -222,9 +216,7 @@
   color: #21313c;
 }
 
-/* ==========================================
-   ORDER LIST
-========================================== */
+/* Order List */
 
 .orders-list {
   display: flex;
@@ -409,9 +401,7 @@
   line-height: 1.5;
 }
 
-/* ==========================================
-   ORDER SIDE
-========================================== */
+/* Order Side */
 
 .order-side {
   display: flex;
@@ -494,9 +484,7 @@
   background: #fff6f6;
 }
 
-/* ==========================================
-   STATUS
-========================================== */
+/* Status */
 
 .order-status {
   display: inline-flex;
@@ -540,9 +528,7 @@
   color: #c32929;
 }
 
-/* ==========================================
-   STATES
-========================================== */
+/* States */
 
 .orders-state {
   display: flex;
@@ -578,9 +564,7 @@
   font-size: 0.8rem;
 }
 
-/* ==========================================
-   MODAL
-========================================== */
+/* Modal */
 
 .orders-modal-overlay {
   position: fixed;
@@ -786,9 +770,7 @@
   font-size: 1.3rem;
 }
 
-/* ==========================================
-   CONFIRM MODAL
-========================================== */
+/* Confirm Modal */
 
 .order-confirm-modal {
   width: min(100%, 420px);
@@ -899,9 +881,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================
-   TOAST
-========================================== */
+/* Toast */
 
 .admin-orders-toast {
   position: fixed;
@@ -933,9 +913,7 @@
   background: #b42323;
 }
 
-/* ==========================================
-   ANIMATION
-========================================== */
+/* Animation */
 
 .orders-spinning {
   animation: ordersSpin 0.9s linear infinite;
@@ -963,9 +941,7 @@
   }
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
+/* Responsive */
 
 @media (max-width: 1100px) {
   .orders-summary-grid {

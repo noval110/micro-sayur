@@ -92,17 +92,13 @@ export default function CartDrawer() {
     <>
       <div className={`cart-backdrop ${isCartOpen ? 'open' : ''}`} onClick={handleClose}></div>
       <div className={`cart-drawer ${isCartOpen ? 'open' : ''}`}>
-        
-        {/* Header */}
-        <div className="cart-header">
+<div className="cart-header">
           <h2>{checkoutStep === 'delivery' && checkoutStatus !== 'success' ? 'Detail Pengiriman' : 'Keranjang Belanja'}</h2>
           <button className="cart-close-btn" onClick={handleClose}>
             <IconX size={22} />
           </button>
         </div>
-
-        {/* Body */}
-        <div className="cart-body">
+<div className="cart-body">
           {checkoutStatus === 'success' ? (
             <div className="cart-empty" style={{ padding: '40px 10px' }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#d1fae5', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
@@ -122,9 +118,7 @@ export default function CartDrawer() {
             </div>
           ) : checkoutStep === 'delivery' ? (
             <div className="delivery-form">
-              
-              {/* Form Input Alamat */}
-              <div className="form-group">
+<div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <IconMapPin size={18} color="#10b981" /> Alamat Lengkap Pengiriman *
                 </label>
@@ -137,9 +131,7 @@ export default function CartDrawer() {
                   style={{ resize: 'vertical' }}
                 />
               </div>
-
-              {/* Form Input Catatan */}
-              <div className="form-group">
+<div className="form-group">
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <IconNotes size={18} color="#64748b" /> Catatan untuk Kurir (Opsional)
                 </label>
@@ -151,9 +143,7 @@ export default function CartDrawer() {
                   onChange={(e) => setDeliveryNotes(e.target.value)}
                 />
               </div>
-
-              {/* Ringkasan Pesanan Box */}
-              <div className="delivery-summary">
+<div className="delivery-summary">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
                   <IconTruck size={20} color="#10b981" />
                   <h4>Ringkasan Pesanan</h4>
@@ -198,9 +188,7 @@ export default function CartDrawer() {
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        {cartItems.length > 0 && checkoutStatus !== 'success' && (
+{cartItems.length > 0 && checkoutStatus !== 'success' && (
           <div className="cart-footer">
             {checkoutStep === 'cart' ? (
               <>

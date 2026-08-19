@@ -11,15 +11,13 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrInsufficientStock =
-	errors.New(
-		"stok produk tidak mencukupi atau produk tidak ditemukan",
-	)
+var ErrInsufficientStock = errors.New(
+	"stok produk tidak mencukupi atau produk tidak ditemukan",
+)
 
-var ErrProductNotFound =
-	errors.New(
-		"produk tidak ditemukan",
-	)
+var ErrProductNotFound = errors.New(
+	"produk tidak ditemukan",
+)
 
 type ProductRepositoryInterface interface {
 	GetAllProducts(
@@ -66,11 +64,6 @@ func NewProductRepository(
 		db: db,
 	}
 }
-
-// ==========================================
-// GET ALL
-// ==========================================
-
 func (r *productRepository) GetAllProducts(
 	ctx context.Context,
 ) ([]entity.ProductEntity, error) {
@@ -118,11 +111,6 @@ func (r *productRepository) GetAllProducts(
 
 	return entities, nil
 }
-
-// ==========================================
-// GET BY ID
-// ==========================================
-
 func (r *productRepository) GetProductByID(
 	ctx context.Context,
 	id int64,
@@ -165,11 +153,6 @@ func (r *productRepository) GetProductByID(
 		Rating:   product.Rating,
 	}, nil
 }
-
-// ==========================================
-// REDUCE STOCK
-// ==========================================
-
 func (r *productRepository) ReduceStock(
 	ctx context.Context,
 	id int64,
@@ -211,11 +194,6 @@ func (r *productRepository) ReduceStock(
 
 	return nil
 }
-
-// ==========================================
-// CREATE
-// ==========================================
-
 func (r *productRepository) CreateProduct(
 	ctx context.Context,
 	req entity.ProductEntity,
@@ -247,11 +225,6 @@ func (r *productRepository) CreateProduct(
 
 	return nil
 }
-
-// ==========================================
-// UPDATE
-// ==========================================
-
 func (r *productRepository) UpdateProduct(
 	ctx context.Context,
 	id int64,
@@ -295,11 +268,6 @@ func (r *productRepository) UpdateProduct(
 
 	return nil
 }
-
-// ==========================================
-// DELETE
-// ==========================================
-
 func (r *productRepository) DeleteProduct(
 	ctx context.Context,
 	id int64,

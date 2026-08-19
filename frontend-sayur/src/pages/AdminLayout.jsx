@@ -58,10 +58,7 @@ export default function AdminLayout() {
 
   return (
     <div className="admin-shell">
-
-      {/* MOBILE OVERLAY */}
-
-      {mobileSidebar && (
+{mobileSidebar && (
         <button
           type="button"
           className="admin-sidebar-overlay"
@@ -71,23 +68,14 @@ export default function AdminLayout() {
           aria-label="Tutup sidebar"
         />
       )}
-
-
-      {/* =====================================
-          SIDEBAR
-      ===================================== */}
-
-      <aside
+<aside
         className={
           mobileSidebar
             ? 'admin-sidebar admin-sidebar-open'
             : 'admin-sidebar'
         }
       >
-
-        {/* BRAND */}
-
-        <div className="admin-sidebar-brand">
+<div className="admin-sidebar-brand">
 
           <Link
             to="/admin"
@@ -125,11 +113,7 @@ export default function AdminLayout() {
           </button>
 
         </div>
-
-
-        {/* ADMIN PROFILE */}
-
-        <div className="admin-profile">
+<div className="admin-profile">
 
           <div className="admin-profile-avatar">
             <IconUser
@@ -150,11 +134,7 @@ export default function AdminLayout() {
           </div>
 
         </div>
-
-
-        {/* NAVIGATION */}
-
-        <div className="admin-sidebar-content">
+<div className="admin-sidebar-content">
 
           <span className="admin-menu-label">
             Menu Utama
@@ -266,11 +246,7 @@ export default function AdminLayout() {
           </nav>
 
         </div>
-
-
-        {/* SIDEBAR FOOTER */}
-
-        <div className="admin-sidebar-footer">
+<div className="admin-sidebar-footer">
 
           <Link
             to="/"
@@ -301,17 +277,8 @@ export default function AdminLayout() {
         </div>
 
       </aside>
-
-
-      {/* =====================================
-          MAIN
-      ===================================== */}
-
-      <div className="admin-main">
-
-        {/* TOPBAR */}
-
-        <header className="admin-topbar">
+<div className="admin-main">
+<header className="admin-topbar">
 
           <div className="admin-topbar-left">
 
@@ -364,11 +331,7 @@ export default function AdminLayout() {
           </div>
 
         </header>
-
-
-        {/* PAGE CONTENT */}
-
-        <main className="admin-page-content">
+<main className="admin-page-content">
           <Outlet />
         </main>
 

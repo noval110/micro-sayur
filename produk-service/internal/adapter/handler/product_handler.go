@@ -75,10 +75,6 @@ type UpdateProductRequest struct {
 	Image string `json:"image"`
 }
 
-// ==========================================
-// GET ALL PRODUCTS
-// ==========================================
-
 func (h *productHandler) GetProducts(
 	c echo.Context,
 ) error {
@@ -111,11 +107,6 @@ func (h *productHandler) GetProducts(
 		},
 	)
 }
-
-// ==========================================
-// GET PRODUCT BY ID
-// ==========================================
-
 func (h *productHandler) GetProductByID(
 	c echo.Context,
 ) error {
@@ -176,12 +167,6 @@ func (h *productHandler) GetProductByID(
 		},
 	)
 }
-
-// ==========================================
-// CREATE PRODUCT
-// ADMIN ONLY
-// ==========================================
-
 func (h *productHandler) CreateProduct(
 	c echo.Context,
 ) error {
@@ -255,12 +240,6 @@ func (h *productHandler) CreateProduct(
 		},
 	)
 }
-
-// ==========================================
-// UPDATE PRODUCT
-// ADMIN ONLY
-// ==========================================
-
 func (h *productHandler) UpdateProduct(
 	c echo.Context,
 ) error {
@@ -422,12 +401,6 @@ func (h *productHandler) UpdateProduct(
 		},
 	)
 }
-
-// ==========================================
-// DELETE PRODUCT
-// ADMIN ONLY
-// ==========================================
-
 func (h *productHandler) DeleteProduct(
 	c echo.Context,
 ) error {
@@ -492,12 +465,6 @@ func (h *productHandler) DeleteProduct(
 		},
 	)
 }
-
-// ==========================================
-// REDUCE STOCK
-// INTERNAL ONLY
-// ==========================================
-
 func (h *productHandler) ReduceStock(
 	c echo.Context,
 ) error {
@@ -559,11 +526,72 @@ func (h *productHandler) ReduceStock(
 		},
 	)
 }
+func getProductPublicBaseURL(c echo.Context) string {
+	configuredURL := strings.TrimSpace(
+		os.Getenv("PUBLIC_API_URL"),
+	)
 
-// ==========================================
-// UPLOAD PRODUCT IMAGE
-// ADMIN ONLY
-// ==========================================
+	requestHost := strings.TrimSpace(
+		c.Request().Host,
+	)
+
+	isLocalURL := func(value string) bool {
+		value = strings.ToLower(value)
+
+		return strings.Contains(value, "localhost") ||
+			strings.Contains(value, "127.0.0.1")
+	}
+
+	isLocalHost := func(value string) bool {
+		value = strings.ToLower(value)
+
+		return strings.Contains(value, "localhost") ||
+			strings.HasPrefix(value, "127.0.0.1")
+	}
+
+	// Kalau PUBLIC_API_URL sudah domain production,
+	// gunakan itu.
+	if configuredURL != "" &&
+		!isLocalURL(configuredURL) {
+
+		return strings.TrimRight(
+			configuredURL,
+			"/",
+		)
+	}
+
+	// Kalau backend lokal diakses lewat Cloudflare Tunnel,
+	// Host request adalah *.trycloudflare.com.
+	if requestHost != "" &&
+		!isLocalHost(requestHost) {
+
+		scheme := strings.TrimSpace(
+			c.Request().
+				Header.
+				Get("X-Forwarded-Proto"),
+		)
+
+		if scheme == "" {
+			scheme = "https"
+		}
+
+		return fmt.Sprintf(
+			"%s://%s",
+			scheme,
+			requestHost,
+		)
+	}
+
+	// Local development biasa.
+	if configuredURL != "" {
+		return strings.TrimRight(
+			configuredURL,
+			"/",
+		)
+	}
+
+	return "http://localhost:8000"
+}
 
 func (h *productHandler) UploadProductImage(
 	c echo.Context,
@@ -769,16 +797,16 @@ func (h *productHandler) UploadProductImage(
 		)
 	}
 
-	baseURL := os.Getenv("PUBLIC_API_URL")
-
-	if baseURL == "" {
-		baseURL = "http://localhost:8000"
-	}
+	baseURL :=
+		getProductPublicBaseURL(c)
 
 	imageURL :=
 		fmt.Sprintf(
 			"%s/uploads/products/%s",
-			baseURL,
+			strings.TrimRight(
+				baseURL,
+				"/",
+			),
 			fileName,
 		)
 
@@ -799,11 +827,6 @@ func (h *productHandler) UploadProductImage(
 		},
 	)
 }
-
-// ==========================================
-// INTERNAL SERVICE AUTH
-// ==========================================
-
 func internalServiceAuth(
 	next echo.HandlerFunc,
 ) echo.HandlerFunc {
@@ -858,11 +881,6 @@ func internalServiceAuth(
 		return next(c)
 	}
 }
-
-// ==========================================
-// REGISTER ROUTES
-// ==========================================
-
 func NewProductHandler(
 	e *echo.Echo,
 	service service.ProductServiceInterface,

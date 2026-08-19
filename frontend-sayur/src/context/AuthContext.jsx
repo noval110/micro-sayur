@@ -38,12 +38,7 @@ export const AuthProvider = ({
 
   const [loading, setLoading] =
     useState(false);
-
-  // ==========================================
-  // LOGIN
-  // ==========================================
-
-  const login = async (
+const login = async (
     email,
     password
   ) => {
@@ -124,12 +119,7 @@ export const AuthProvider = ({
       setLoading(false);
     }
   };
-
-  // ==========================================
-  // REGISTER
-  // ==========================================
-
-  const register = async (
+const register = async (
     name,
     email,
     password
@@ -171,12 +161,7 @@ export const AuthProvider = ({
       setLoading(false);
     }
   };
-
-  // ==========================================
-  // LOGOUT
-  // ==========================================
-
-  const logout = () => {
+const logout = () => {
     setUser(null);
     setToken('');
 
@@ -188,12 +173,7 @@ export const AuthProvider = ({
       'sayur_user'
     );
   };
-
-  // ==========================================
-  // AUTH STATE
-  // ==========================================
-
-  const isAuthenticated =
+const isAuthenticated =
     Boolean(token);
 
   return (

@@ -127,11 +127,8 @@ func (m *middlewareAdapter) CheckToken() echo.MiddlewareFunc {
 
 // CheckAdmin
 // Middleware ini harus dipasang SETELAH CheckToken().
-//
 // CheckToken() memasukkan session Redis ke:
-//
 //	c.Set("user", getSession)
-//
 // Lalu CheckAdmin() membaca role dari session tersebut.
 func (m *middlewareAdapter) CheckAdmin() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {

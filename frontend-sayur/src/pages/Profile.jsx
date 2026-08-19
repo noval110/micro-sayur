@@ -50,12 +50,7 @@ export default function Profile() {
 
   const [photo, setPhoto] =
     useState('');
-
-  // =========================================
-  // LOAD
-  // =========================================
-
-  const loadProfile = async () => {
+const loadProfile = async () => {
     try {
       setLoading(true);
 
@@ -104,12 +99,7 @@ export default function Profile() {
   useEffect(() => {
     loadProfile();
   }, []);
-
-  // =========================================
-  // TOAST
-  // =========================================
-
-  const showToast = (
+const showToast = (
     message,
     type = 'success'
   ) => {
@@ -125,12 +115,7 @@ export default function Profile() {
       3000
     );
   };
-
-  // =========================================
-  // PHOTO
-  // =========================================
-
-  const handlePhotoChange = async (
+const handlePhotoChange = async (
     event
   ) => {
     const file =
@@ -211,12 +196,7 @@ export default function Profile() {
       setUploading(false);
     }
   };
-
-  // =========================================
-  // SAVE
-  // =========================================
-
-  const handleSubmit = async (
+const handleSubmit = async (
     event
   ) => {
     event.preventDefault();
@@ -349,10 +329,7 @@ export default function Profile() {
         </header>
 
         <div className="profile-layout">
-
-          {/* LEFT */}
-
-          <aside className="profile-sidebar">
+<aside className="profile-sidebar">
 
             <div className="profile-photo-wrapper">
 
@@ -442,10 +419,7 @@ export default function Profile() {
             </div>
 
           </aside>
-
-          {/* RIGHT */}
-
-          <section className="profile-card">
+<section className="profile-card">
 
             <div className="profile-card-header">
               <h2>

@@ -45,12 +45,6 @@ func NewProductClient(
 		},
 	}
 }
-
-// ==========================================
-// GET PRODUCT BY ID
-// PUBLIC READ
-// ==========================================
-
 func (c *productClient) GetProductByID(
 	productID int,
 ) (*ProductResponse, error) {
@@ -105,12 +99,6 @@ func (c *productClient) GetProductByID(
 
 	return &productResp, nil
 }
-
-// ==========================================
-// REDUCE STOCK
-// INTERNAL SERVICE ONLY
-// ==========================================
-
 func (c *productClient) ReduceStock(
 	productID int,
 	quantity int,

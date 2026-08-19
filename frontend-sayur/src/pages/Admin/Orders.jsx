@@ -98,12 +98,7 @@ export default function Orders() {
   useEffect(() => {
     loadOrders();
   }, []);
-
-  // ==========================================
-  // TOAST
-  // ==========================================
-
-  const showToast = (message, type = 'success') => {
+const showToast = (message, type = 'success') => {
     setToast({
       show: true,
       message,
@@ -118,12 +113,7 @@ export default function Orders() {
       });
     }, 3000);
   };
-
-  // ==========================================
-  // LOAD ORDERS
-  // ==========================================
-
-  const loadOrders = async () => {
+const loadOrders = async () => {
     try {
       setLoading(true);
 
@@ -151,12 +141,7 @@ export default function Orders() {
       setLoading(false);
     }
   };
-
-  // ==========================================
-  // UPDATE STATUS
-  // ==========================================
-
-  const updateOrderStatus = async (
+const updateOrderStatus = async (
     orderId,
     newStatus
   ) => {
@@ -214,12 +199,7 @@ export default function Orders() {
       setActionLoading(false);
     }
   };
-
-  // ==========================================
-  // FORMAT
-  // ==========================================
-
-  const formatRupiah = (value) => {
+const formatRupiah = (value) => {
     return Number(value || 0).toLocaleString(
       'id-ID'
     );
@@ -268,12 +248,7 @@ export default function Orders() {
       }
     );
   };
-
-  // ==========================================
-  // STATUS
-  // ==========================================
-
-  const getStatusInfo = (status) => {
+const getStatusInfo = (status) => {
     const current = String(
       status || 'PENDING'
     ).toUpperCase();
@@ -374,12 +349,7 @@ export default function Orders() {
 
     return [];
   };
-
-  // ==========================================
-  // CONFIRM MODAL
-  // ==========================================
-
-  const openConfirmModal = (
+const openConfirmModal = (
     orderId,
     action
   ) => {
@@ -420,12 +390,7 @@ export default function Orders() {
       closeConfirmModal();
     }
   };
-
-  // ==========================================
-  // SUMMARY
-  // ==========================================
-
-  const summary = useMemo(() => {
+const summary = useMemo(() => {
     const total = orders.length;
 
     const pending = orders.filter(
@@ -461,12 +426,7 @@ export default function Orders() {
       done
     };
   }, [orders]);
-
-  // ==========================================
-  // FILTER
-  // ==========================================
-
-  const filteredOrders = useMemo(() => {
+const filteredOrders = useMemo(() => {
     const keyword =
       search.trim().toLowerCase();
 
@@ -520,12 +480,7 @@ export default function Orders() {
 
   return (
     <div className="admin-orders-page">
-
-      {/* ========================================
-          TOAST
-      ======================================== */}
-
-      {toast.show && (
+{toast.show && (
         <div
           className={`admin-orders-toast ${toast.type}`}
         >
@@ -538,12 +493,7 @@ export default function Orders() {
           <span>{toast.message}</span>
         </div>
       )}
-
-      {/* ========================================
-          HEADER
-      ======================================== */}
-
-      <section className="orders-header">
+<section className="orders-header">
         <div>
           <span className="orders-eyebrow">
             Manajemen Pesanan
@@ -575,12 +525,7 @@ export default function Orders() {
           Refresh
         </button>
       </section>
-
-      {/* ========================================
-          SUMMARY
-      ======================================== */}
-
-      <section className="orders-summary-grid">
+<section className="orders-summary-grid">
         <SummaryCard
           title="Total Pesanan"
           value={summary.total}
@@ -611,12 +556,7 @@ export default function Orders() {
           icon={IconCheck}
         />
       </section>
-
-      {/* ========================================
-          CONTENT
-      ======================================== */}
-
-      <section className="orders-content-card">
+<section className="orders-content-card">
 
         <div className="orders-toolbar">
           <div className="orders-search-box">
@@ -672,10 +612,7 @@ export default function Orders() {
             pesanan
           </span>
         </div>
-
-        {/* LOADING */}
-
-        {loading && (
+{loading && (
           <div className="orders-state">
             <IconLoader2
               size={36}
@@ -691,10 +628,7 @@ export default function Orders() {
             </p>
           </div>
         )}
-
-        {/* EMPTY */}
-
-        {!loading &&
+{!loading &&
           filteredOrders.length === 0 && (
             <div className="orders-state">
               <div className="orders-state-icon">
@@ -713,10 +647,7 @@ export default function Orders() {
               </p>
             </div>
           )}
-
-        {/* ORDER LIST */}
-
-        {!loading &&
+{!loading &&
           filteredOrders.length > 0 && (
             <div className="orders-list">
               {filteredOrders.map(
@@ -979,12 +910,7 @@ export default function Orders() {
             </div>
           )}
       </section>
-
-      {/* ========================================
-          DETAIL MODAL
-      ======================================== */}
-
-      {selectedOrder && (
+{selectedOrder && (
         <div
           className="orders-modal-overlay"
           onClick={() =>
@@ -1200,12 +1126,7 @@ export default function Orders() {
           </div>
         </div>
       )}
-
-      {/* ========================================
-          CONFIRM MODAL
-      ======================================== */}
-
-      {confirmModal.show &&
+{confirmModal.show &&
         (() => {
           const config =
             ACTION_CONFIG[
@@ -1311,11 +1232,6 @@ export default function Orders() {
     </div>
   );
 }
-
-// ==========================================
-// SUMMARY CARD
-// ==========================================
-
 function SummaryCard({
   title,
   value,

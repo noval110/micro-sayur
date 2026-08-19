@@ -18,18 +18,8 @@ import (
 )
 
 func StartApp() {
-
-	// ==========================================
-	// DATABASE
-	// ==========================================
-
 	db := config.InitDB()
 	defer db.Close()
-
-	// ==========================================
-	// PRODUCT SERVICE CLIENT
-	// ==========================================
-
 	productServiceURL :=
 		os.Getenv("PRODUCT_SERVICE_URL")
 
@@ -54,11 +44,6 @@ func StartApp() {
 			productServiceURL,
 			internalKey,
 		)
-
-	// ==========================================
-	// CLEAN ARCHITECTURE
-	// ==========================================
-
 	orderRepo :=
 		repository.NewOrderRepository(
 			db,
@@ -74,11 +59,6 @@ func StartApp() {
 		handler.NewOrderHandler(
 			orderService,
 		)
-
-	// ==========================================
-	// ECHO
-	// ==========================================
-
 	e := echo.New()
 
 	e.Use(
@@ -95,19 +75,9 @@ func StartApp() {
 
 	e.Validator =
 		validator.NewCustomValidator()
-
-	// ==========================================
-	// AUTH
-	// ==========================================
-
 	auth :=
 		authmiddleware.NewAuthMiddleware()
-
-	// ==========================================
-	// CUSTOMER ROUTES
-	// ==========================================
-
-	// Customer membuat order.
+		// Customer membuat order.
 	// user_id tidak dipercaya dari frontend.
 	// user_id diambil dari token.
 	e.POST(
@@ -124,20 +94,13 @@ func StartApp() {
 	)
 
 	// Customer melihat SATU order miliknya.
-	//
 	// Handler ini nanti melakukan pengecekan:
-	//
 	// order.UserID == userID dari token
 	e.GET(
 		"/orders/:id",
 		orderHandler.GetMyOrderByID,
 		auth.Authenticated,
 	)
-
-	// ==========================================
-	// ADMIN ROUTES
-	// ==========================================
-
 	// Admin melihat semua order.
 	e.GET(
 		"/orders",
@@ -151,19 +114,10 @@ func StartApp() {
 		orderHandler.UpdateOrderStatus,
 		auth.AdminOnly,
 	)
-
-	// ==========================================
-	// INTERNAL SERVICE ROUTES
-	// ==========================================
-
 	// Payment-service mengambil detail order.
-	//
 	// Contoh:
-	//
 	// GET /internal/orders/5
-	//
 	// Header:
-	//
 	// X-Internal-Key: ...
 	e.GET(
 		"/internal/orders/:id",
@@ -172,18 +126,12 @@ func StartApp() {
 	)
 
 	// Payment-service mengubah status:
-	//
 	// PENDING -> PAID
 	e.PATCH(
 		"/internal/orders/:id/status",
 		orderHandler.UpdateOrderStatus,
 		internalServiceAuth,
 	)
-
-	// ==========================================
-	// HEALTH CHECK
-	// ==========================================
-
 	e.GET(
 		"/health",
 		func(c echo.Context) error {
@@ -197,34 +145,12 @@ func StartApp() {
 			)
 		},
 	)
-
-	// ==========================================
-	// START SERVER
-	// ==========================================
-
 	e.Logger.Fatal(
 		e.Start(":8082"),
 	)
 }
 
-// ==========================================
-// INTERNAL SERVICE AUTH
-// ==========================================
-//
-// Middleware ini TIDAK digunakan oleh user.
-//
-// Digunakan untuk komunikasi:
-//
-// payment-service
-//        ↓
-// order-service
-//
-// dengan header:
-//
-// X-Internal-Key
-//
-// ==========================================
-
+// internalServiceAuth validates X-Internal-Key for requests from payment-service.
 func internalServiceAuth(
 	next echo.HandlerFunc,
 ) echo.HandlerFunc {

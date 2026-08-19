@@ -83,13 +83,7 @@ export default function Navbar() {
     searchTerm,
     setSearchTerm
   ] = useState('');
-
-
-  // ==========================================
-  // CART COUNT
-  // ==========================================
-
-  const totalCartCount =
+const totalCartCount =
     useMemo(() => {
       if (
         !Array.isArray(
@@ -108,13 +102,7 @@ export default function Navbar() {
         0
       );
     }, [cartItems]);
-
-
-  // ==========================================
-  // FETCH CATEGORY FROM BACKEND
-  // ==========================================
-
-  useEffect(() => {
+useEffect(() => {
     const fetchProducts =
       async () => {
         try {
@@ -151,13 +139,7 @@ export default function Navbar() {
 
     fetchProducts();
   }, []);
-
-
-  // ==========================================
-  // DYNAMIC CATEGORY
-  // ==========================================
-
-  const categories =
+const categories =
     useMemo(() => {
       return [
         ...new Set(
@@ -173,13 +155,7 @@ export default function Navbar() {
         )
       ].slice(0, 8);
     }, [products]);
-
-
-  // ==========================================
-  // SCROLL EFFECT
-  // ==========================================
-
-  useEffect(() => {
+useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(
         window.scrollY > 15
@@ -200,13 +176,7 @@ export default function Navbar() {
       );
     };
   }, []);
-
-
-  // ==========================================
-  // CLOSE MENU WHEN ROUTE CHANGES
-  // ==========================================
-
-  useEffect(() => {
+useEffect(() => {
     setShowUserMenu(false);
     setShowCategoryMenu(false);
     setShowMobileMenu(false);
@@ -214,13 +184,7 @@ export default function Navbar() {
     location.pathname,
     location.search
   ]);
-
-
-  // ==========================================
-  // CLICK OUTSIDE
-  // ==========================================
-
-  useEffect(() => {
+useEffect(() => {
     const handleClickOutside =
       (event) => {
         if (
@@ -246,13 +210,7 @@ export default function Navbar() {
       );
     };
   }, []);
-
-
-  // ==========================================
-  // LOGOUT
-  // ==========================================
-
-  const handleLogout = () => {
+const handleLogout = () => {
     setShowUserMenu(false);
     setShowMobileMenu(false);
 
@@ -260,13 +218,7 @@ export default function Navbar() {
 
     navigate('/login');
   };
-
-
-  // ==========================================
-  // SEARCH
-  // ==========================================
-
-  const handleSearch = (
+const handleSearch = (
     event
   ) => {
     event.preventDefault();
@@ -288,13 +240,7 @@ export default function Navbar() {
     setSearchTerm('');
     setShowMobileMenu(false);
   };
-
-
-  // ==========================================
-  // CATEGORY NAVIGATION
-  // ==========================================
-
-  const handleCategory = (
+const handleCategory = (
     category
   ) => {
     navigate(
@@ -317,18 +263,10 @@ export default function Navbar() {
           : ''
       }`}
     >
-
-      {/* ====================================
-          MAIN NAVBAR
-      ==================================== */}
-
-      <div className="navbar-main">
+<div className="navbar-main">
 
         <div className="navbar-container">
-
-          {/* LOGO */}
-
-          <Link
+<Link
             to="/"
             className="navbar-brand"
           >
@@ -340,11 +278,7 @@ export default function Navbar() {
               Sayur-day
             </span>
           </Link>
-
-
-          {/* DESKTOP SEARCH */}
-
-          <form
+<form
             className="navbar-search"
             onSubmit={handleSearch}
           >
@@ -369,15 +303,8 @@ export default function Navbar() {
               Cari
             </button>
           </form>
-
-
-          {/* ACTIONS */}
-
-          <div className="navbar-actions">
-
-            {/* CART */}
-
-            <Link
+<div className="navbar-actions">
+<Link
               to="/cart"
               className="navbar-cart-button"
               aria-label="Keranjang"
@@ -398,11 +325,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-
-
-            {/* USER */}
-
-            {isAuthenticated ? (
+{isAuthenticated ? (
               <div className="navbar-user-wrapper">
 
                 <button
@@ -447,11 +370,7 @@ export default function Navbar() {
                   />
 
                 </button>
-
-
-                {/* USER DROPDOWN */}
-
-                {showUserMenu && (
+{showUserMenu && (
                   <div className="navbar-user-dropdown">
 
                     <div className="navbar-dropdown-profile">
@@ -552,11 +471,7 @@ export default function Navbar() {
                 Masuk
               </Link>
             )}
-
-
-            {/* MOBILE TOGGLE */}
-
-            <button
+<button
               type="button"
               className="navbar-mobile-toggle"
               onClick={() =>
@@ -579,19 +494,10 @@ export default function Navbar() {
         </div>
 
       </div>
-
-
-      {/* ====================================
-          DESKTOP BOTTOM NAV
-      ==================================== */}
-
-      <div className="navbar-bottom">
+<div className="navbar-bottom">
 
         <div className="navbar-container navbar-bottom-inner">
-
-          {/* CATEGORY */}
-
-          <div className="navbar-category-wrapper">
+<div className="navbar-category-wrapper">
 
             <button
               type="button"
@@ -677,11 +583,7 @@ export default function Navbar() {
             )}
 
           </div>
-
-
-          {/* NAVIGATION */}
-
-          <nav className="navbar-navigation">
+<nav className="navbar-navigation">
 
             <NavLink
               to="/"
@@ -741,13 +643,7 @@ export default function Navbar() {
         </div>
 
       </div>
-
-
-      {/* ====================================
-          MOBILE MENU
-      ==================================== */}
-
-      {showMobileMenu && (
+{showMobileMenu && (
         <div className="navbar-mobile-menu">
 
           <form

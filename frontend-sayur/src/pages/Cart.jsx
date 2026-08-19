@@ -164,10 +164,7 @@ export default function Cart() {
           </section>
         ) : (
           <div className="cc-layout">
-
-            {/* LEFT */}
-
-            <section className="cc-card cc-cart-card">
+<section className="cc-card cc-cart-card">
               <div className="cc-card-header">
                 <div>
                   <h2>
@@ -334,10 +331,7 @@ export default function Cart() {
                 )}
               </div>
             </section>
-
-            {/* RIGHT */}
-
-            <aside className="cc-sidebar">
+<aside className="cc-sidebar">
               <div className="cc-card cc-summary">
                 <h2>
                   Ringkasan Belanja

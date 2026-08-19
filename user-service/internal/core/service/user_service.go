@@ -53,10 +53,6 @@ type userService struct {
 	jwtService JwtServiceInterface
 }
 
-// ==========================================
-// CREATE USER
-// ==========================================
-
 func (
 	u *userService,
 ) CreateUserAccount(
@@ -122,11 +118,6 @@ func (
 
 	return nil
 }
-
-// ==========================================
-// SIGN IN
-// ==========================================
-
 func (
 	u *userService,
 ) SignIn(
@@ -209,12 +200,6 @@ func (
 		token,
 		nil
 }
-
-// ==========================================
-// GET ALL USERS
-// ADMIN
-// ==========================================
-
 func (
 	u *userService,
 ) GetAllUsers(

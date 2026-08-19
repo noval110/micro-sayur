@@ -52,11 +52,6 @@ func NewOrderService(
 		productClient: productClient,
 	}
 }
-
-// ==========================================
-// CREATE ORDER
-// ==========================================
-
 func (s *orderService) CreateOrder(
 	ctx context.Context,
 	req dto.CreateOrderRequest,
@@ -107,11 +102,6 @@ func (s *orderService) CreateOrder(
 			},
 		)
 	}
-
-	// ==================================
-	// ONGKIR
-	// ==================================
-
 	shippingCost := 0.0
 
 	if totalPrice > 0 &&
@@ -163,11 +153,6 @@ func (s *orderService) CreateOrder(
 
 	return order, nil
 }
-
-// ==========================================
-// GET ALL
-// ==========================================
-
 func (s *orderService) GetAllOrders(
 	ctx context.Context,
 ) ([]domain.Order, error) {
@@ -176,11 +161,6 @@ func (s *orderService) GetAllOrders(
 		ctx,
 	)
 }
-
-// ==========================================
-// GET MY ORDERS
-// ==========================================
-
 func (s *orderService) GetOrdersByUserID(
 	ctx context.Context,
 	userID int,
@@ -191,11 +171,6 @@ func (s *orderService) GetOrdersByUserID(
 		userID,
 	)
 }
-
-// ==========================================
-// GET BY ID
-// ==========================================
-
 func (s *orderService) GetOrderByID(
 	ctx context.Context,
 	id int,
@@ -206,11 +181,6 @@ func (s *orderService) GetOrderByID(
 		id,
 	)
 }
-
-// ==========================================
-// UPDATE STATUS
-// ==========================================
-
 func (s *orderService) UpdateOrderStatus(
 	ctx context.Context,
 	id int,

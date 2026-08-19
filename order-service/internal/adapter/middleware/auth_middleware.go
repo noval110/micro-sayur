@@ -43,17 +43,12 @@ func NewAuthMiddleware() *AuthMiddleware {
 	}
 }
 
-// ==========================================
 // AUTHENTICATED
-//
 // Semua user yang sudah login:
 // - Customer
 // - Super Admin
-//
 // Middleware akan mengambil user_id dari
 // user-service lalu menyimpannya ke Context.
-// ==========================================
-
 func (m *AuthMiddleware) Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")
@@ -158,11 +153,6 @@ func (m *AuthMiddleware) Authenticated(next echo.HandlerFunc) echo.HandlerFunc {
 		return next(c)
 	}
 }
-
-// ==========================================
-// ADMIN ONLY
-// ==========================================
-
 func (m *AuthMiddleware) AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get("Authorization")

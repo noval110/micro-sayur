@@ -46,11 +46,6 @@ func NewOrderRepository(
 		db: db,
 	}
 }
-
-// ==========================================
-// CREATE ORDER
-// ==========================================
-
 func (r *orderRepository) CreateOrder(
 	ctx context.Context,
 	order *domain.Order,
@@ -138,12 +133,6 @@ func (r *orderRepository) CreateOrder(
 
 	return tx.Commit()
 }
-
-// ==========================================
-// GET ORDER ITEMS
-// Helper internal repository
-// ==========================================
-
 func (r *orderRepository) getOrderItems(
 	ctx context.Context,
 	orderID int,
@@ -208,12 +197,6 @@ func (r *orderRepository) getOrderItems(
 
 	return items, nil
 }
-
-// ==========================================
-// GET ALL ORDERS
-// Admin
-// ==========================================
-
 func (r *orderRepository) GetAllOrders(
 	ctx context.Context,
 ) ([]domain.Order, error) {
@@ -295,11 +278,6 @@ func (r *orderRepository) GetAllOrders(
 
 	return orders, nil
 }
-
-// ==========================================
-// GET MY ORDERS
-// ==========================================
-
 func (r *orderRepository) GetOrdersByUserID(
 	ctx context.Context,
 	userID int,
@@ -384,11 +362,6 @@ func (r *orderRepository) GetOrdersByUserID(
 
 	return orders, nil
 }
-
-// ==========================================
-// GET ORDER BY ID
-// ==========================================
-
 func (r *orderRepository) GetOrderByID(
 	ctx context.Context,
 	id int,
@@ -443,11 +416,6 @@ func (r *orderRepository) GetOrderByID(
 
 	return &order, nil
 }
-
-// ==========================================
-// UPDATE STATUS
-// ==========================================
-
 func (r *orderRepository) UpdateOrderStatus(
 	ctx context.Context,
 	id int,

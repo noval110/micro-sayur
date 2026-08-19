@@ -44,12 +44,7 @@ export default function Katalog() {
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  // ==========================================
-  // READ URL PARAM
-  // ==========================================
-
-  useEffect(() => {
+useEffect(() => {
     const params =
       new URLSearchParams(location.search);
 
@@ -67,12 +62,7 @@ export default function Katalog() {
       searchParam || ''
     );
   }, [location.search]);
-
-  // ==========================================
-  // FETCH PRODUCTS
-  // ==========================================
-
-  useEffect(() => {
+useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -109,12 +99,7 @@ export default function Katalog() {
       setLoading(false);
     }
   };
-
-  // ==========================================
-  // DYNAMIC CATEGORIES
-  // ==========================================
-
-  const categories = useMemo(() => {
+const categories = useMemo(() => {
     const uniqueCategories = [
       ...new Set(
         products
@@ -132,12 +117,7 @@ export default function Katalog() {
       ...uniqueCategories
     ];
   }, [products]);
-
-  // ==========================================
-  // FILTER + SORT
-  // ==========================================
-
-  const filteredProducts = useMemo(() => {
+const filteredProducts = useMemo(() => {
     const keyword =
       searchTerm.trim().toLowerCase();
 
@@ -206,12 +186,7 @@ export default function Katalog() {
     selectedCategory,
     sortBy
   ]);
-
-  // ==========================================
-  // CATEGORY
-  // ==========================================
-
-  const handleCategoryChange = (
+const handleCategoryChange = (
     category
   ) => {
     setSelectedCategory(category);
@@ -245,12 +220,7 @@ export default function Katalog() {
         : '/katalog'
     );
   };
-
-  // ==========================================
-  // SEARCH
-  // ==========================================
-
-  const handleSearchChange = (e) => {
+const handleSearchChange = (e) => {
     const value =
       e.target.value;
 
@@ -288,12 +258,7 @@ export default function Katalog() {
         : '/katalog'
     );
   };
-
-  // ==========================================
-  // CART
-  // ==========================================
-
-  const handleAddToCart = (
+const handleAddToCart = (
     product
   ) => {
     const stock =
@@ -324,10 +289,7 @@ export default function Katalog() {
   return (
     <div className="katalog-page">
       <main className="katalog-container">
-
-        {/* HEADER */}
-
-        <section className="katalog-top">
+<section className="katalog-top">
           <div className="katalog-heading">
             <span className="katalog-eyebrow">
               Produk Sayur-day
@@ -367,10 +329,7 @@ export default function Katalog() {
             </button>
           </form>
         </section>
-
-        {/* FILTER */}
-
-        <section className="katalog-toolbar">
+<section className="katalog-toolbar">
           <div className="katalog-category-list">
             {categories.map(
               (category) => (
@@ -436,10 +395,7 @@ export default function Katalog() {
             </div>
           </div>
         </section>
-
-        {/* RESULT INFO */}
-
-        {!loading &&
+{!loading &&
           !error && (
             <div className="katalog-result-info">
               <strong>
@@ -459,10 +415,7 @@ export default function Katalog() {
               )}
             </div>
           )}
-
-        {/* CONTENT */}
-
-        {loading ? (
+{loading ? (
           <div className="katalog-state">
             <IconLoader2
               size={30}

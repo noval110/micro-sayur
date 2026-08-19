@@ -107,10 +107,7 @@ export default function Login() {
     <div className="auth-page">
 
       <div className="auth-layout">
-
-        {/* LEFT */}
-
-        <section className="auth-showcase">
+<section className="auth-showcase">
           <Link
             to="/"
             className="auth-brand"
@@ -162,11 +159,7 @@ export default function Login() {
             </div>
           </div>
         </section>
-
-
-        {/* RIGHT */}
-
-        <section className="auth-form-section">
+<section className="auth-form-section">
 
           <div className="auth-card">
 

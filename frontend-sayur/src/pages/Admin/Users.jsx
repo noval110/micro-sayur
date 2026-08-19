@@ -55,12 +55,7 @@ export default function Users() {
     selectedUser,
     setSelectedUser
   ] = useState(null);
-
-  // =========================================
-  // LOAD USERS
-  // =========================================
-
-  const loadUsers = async () => {
+const loadUsers = async () => {
     try {
       setLoading(true);
       setError('');
@@ -103,12 +98,7 @@ export default function Users() {
   useEffect(() => {
     loadUsers();
   }, []);
-
-  // =========================================
-  // TOAST
-  // =========================================
-
-  const showToast = (
+const showToast = (
     message,
     type = 'success'
   ) => {
@@ -124,12 +114,7 @@ export default function Users() {
       3000
     );
   };
-
-  // =========================================
-  // ROLE
-  // =========================================
-
-  const normalizeRole = (
+const normalizeRole = (
     role
   ) => {
     return String(
@@ -173,12 +158,7 @@ export default function Users() {
         IconUser
     };
   };
-
-  // =========================================
-  // ROLES FROM BACKEND
-  // =========================================
-
-  const roles =
+const roles =
     useMemo(() => {
       const values =
         users
@@ -192,12 +172,7 @@ export default function Users() {
         ...new Set(values)
       ].sort();
     }, [users]);
-
-  // =========================================
-  // FILTER
-  // =========================================
-
-  const filteredUsers =
+const filteredUsers =
     useMemo(() => {
       const keyword =
         search
@@ -262,12 +237,7 @@ export default function Users() {
       roleFilter,
       verificationFilter
     ]);
-
-  // =========================================
-  // STATS
-  // =========================================
-
-  const stats =
+const stats =
     useMemo(() => {
       const total =
         users.length;
@@ -324,12 +294,7 @@ export default function Users() {
 
   return (
     <div className="users-page">
-
-      {/* ===================================
-          TOAST
-      =================================== */}
-
-      {toast && (
+{toast && (
         <div
           className={
             toast.type ===
@@ -352,12 +317,7 @@ export default function Users() {
           {toast.message}
         </div>
       )}
-
-      {/* ===================================
-          HEADER
-      =================================== */}
-
-      <header className="users-header">
+<header className="users-header">
 
         <div>
           <span className="users-eyebrow">
@@ -398,12 +358,7 @@ export default function Users() {
         </button>
 
       </header>
-
-      {/* ===================================
-          ERROR
-      =================================== */}
-
-      {error && (
+{error && (
         <div className="users-error">
           <IconAlertCircle
             size={19}
@@ -420,12 +375,7 @@ export default function Users() {
           </div>
         </div>
       )}
-
-      {/* ===================================
-          STATS
-      =================================== */}
-
-      <section className="users-stats">
+<section className="users-stats">
 
         <UserStat
           title="Total Pengguna"
@@ -478,12 +428,7 @@ export default function Users() {
         />
 
       </section>
-
-      {/* ===================================
-          MAIN CARD
-      =================================== */}
-
-      <section className="users-card">
+<section className="users-card">
 
         <div className="users-card-header">
 
@@ -573,10 +518,7 @@ export default function Users() {
           </div>
 
         </div>
-
-        {/* LOADING */}
-
-        {loading ? (
+{loading ? (
           <div className="users-state">
 
             <IconLoader2
@@ -794,12 +736,7 @@ export default function Users() {
         )}
 
       </section>
-
-      {/* ===================================
-          DETAIL MODAL
-      =================================== */}
-
-      {selectedUser && (
+{selectedUser && (
         <div
           className="users-modal-backdrop"
           onClick={() =>
@@ -977,11 +914,6 @@ export default function Users() {
     </div>
   );
 }
-
-// =========================================
-// STAT COMPONENT
-// =========================================
-
 function UserStat({
   title,
   value,
@@ -1010,11 +942,6 @@ function UserStat({
     </article>
   );
 }
-
-// =========================================
-// DETAIL ITEM
-// =========================================
-
 function UserDetailItem({
   icon,
   label,
