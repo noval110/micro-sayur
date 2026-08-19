@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  Link,
-  useNavigate
-} from 'react-router-dom';
-
-import Navbar from '../components/Navbar';
+import { Link, useNavigate } from 'react-router-dom';
 
 import {
   IconArrowLeft,
@@ -109,8 +104,6 @@ export default function Cart() {
 
   return (
     <div className="cc-page">
-      <Navbar />
-
       <main className="cc-container">
         <div className="cc-page-header">
           <div>

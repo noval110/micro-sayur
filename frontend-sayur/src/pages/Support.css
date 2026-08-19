@@ -1,0 +1,107 @@
+.support-page {
+  background-color: var(--gray-light, #f8fafc);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+.support-header-modern {
+  background: radial-gradient(circle at top left, rgba(16, 185, 129, 0.1), transparent 50%),
+              linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  padding: 70px 20px 80px;
+  text-align: center;
+  border-bottom: 1px solid #d1fae5;
+}
+
+.support-hero-badge {
+  background-color: #d1fae5;
+  color: #047857;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.1);
+}
+
+.support-header-modern h1 {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+}
+
+.support-header-modern p {
+  font-size: 1.05rem;
+  color: #475569;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.support-container-modern {
+  max-width: 900px;
+  margin: -40px auto 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.support-content-card {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.support-content-card h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #ecfdf5;
+  padding-bottom: 10px;
+}
+
+.support-content-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 24px;
+  margin-bottom: 10px;
+}
+
+.support-content-card p {
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+}
+
+.support-content-card ul, .support-content-card ol {
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  padding-left: 20px;
+  font-size: 0.95rem;
+}
+
+.support-content-card li {
+  margin-bottom: 8px;
+}
+
+.support-content-card .highlight {
+  color: #10b981;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .support-content-card {
+    padding: 24px;
+  }
+  .support-header-modern h1 {
+    font-size: 1.8rem;
+  }
+}

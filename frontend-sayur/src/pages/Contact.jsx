@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
 import { IconMapPin, IconPhone, IconMail, IconSend, IconCheck } from '@tabler/icons-react';
 import './Contact.css';
 
@@ -14,8 +13,6 @@ export default function Contact() {
 
   return (
     <div className="contact-page">
-      <Navbar />
-
       <div className="contact-header-modern">
         <h1>Hubungi Tim Kami</h1>
         <p>

@@ -8,7 +8,6 @@ import {
   useNavigate
 } from 'react-router-dom';
 
-import Navbar from '../components/Navbar';
 import api from '../api';
 
 import {
@@ -577,9 +576,6 @@ export default function Checkout() {
     return (
       <div className="cc-page">
 
-        <Navbar />
-
-
         <main className="cc-container">
 
           <section className="cc-success">
@@ -738,9 +734,6 @@ export default function Checkout() {
     return (
       <div className="cc-page">
 
-        <Navbar />
-
-
         <main className="cc-container">
 
           <section className="cc-empty">
@@ -792,9 +785,6 @@ export default function Checkout() {
 
   return (
     <div className="cc-page">
-
-      <Navbar />
-
 
       <main className="cc-container">
 
@@ -1389,7 +1379,6 @@ export default function Checkout() {
 
 
       </main>
-
     </div>
   );
 }

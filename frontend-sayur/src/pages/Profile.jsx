@@ -3,6 +3,7 @@ import React, {
   useState
 } from 'react';
 
+import { useAuth } from '../context/AuthContext';
 import api from '../api';
 
 import { Link } from 'react-router-dom';
@@ -294,9 +295,10 @@ export default function Profile() {
   }
 
   return (
-    <main className="profile-page">
+    <>
+      <main className="profile-page">
 
-      {toast && (
+        {toast && (
         <div
           className={
             toast.type ===
@@ -588,8 +590,8 @@ export default function Profile() {
           </section>
 
         </div>
-
       </div>
     </main>
+    </>
   );
 }

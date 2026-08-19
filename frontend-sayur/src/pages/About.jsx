@@ -1,5 +1,4 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
 import './About.css';
 
 const IconTrendingUp = () => (
@@ -29,8 +28,6 @@ const IconStore = () => (
 export default function About() {
   return (
     <div className="about-page">
-      <Navbar />
-
       <div className="about-hero-modern">
         <h1 className="about-hero-title">Menghubungkan Kebun Lokal ke Meja Makan Anda</h1>
         <p className="about-hero-desc">

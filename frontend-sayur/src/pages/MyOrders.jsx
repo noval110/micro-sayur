@@ -4,7 +4,6 @@ import React, {
   useState
 } from 'react';
 
-import Navbar from '../components/Navbar';
 import api from '../api';
 
 import {
@@ -702,8 +701,6 @@ export default function MyOrders() {
 
   return (
     <div className="orders-page">
-      <Navbar />
-
 
       {/* TOAST */}
 
@@ -1491,7 +1488,6 @@ export default function MyOrders() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

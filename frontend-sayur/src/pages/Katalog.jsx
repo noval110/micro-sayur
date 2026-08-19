@@ -8,8 +8,6 @@ import {
   useLocation,
   useNavigate
 } from 'react-router-dom';
-
-import Navbar from '../components/Navbar';
 import api from '../api';
 import { useCart } from '../context/CartContext';
 
@@ -325,8 +323,6 @@ export default function Katalog() {
 
   return (
     <div className="katalog-page">
-      <Navbar />
-
       <main className="katalog-container">
 
         {/* HEADER */}

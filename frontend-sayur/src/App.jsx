@@ -8,6 +8,9 @@ import Home from './pages/Home';
 import Katalog from './pages/Katalog';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import HowToBuy from './pages/HowToBuy';
+import Returns from './pages/Returns';
+import Terms from './pages/Terms';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import MyOrders from './pages/MyOrders';
@@ -21,6 +24,8 @@ import Products from './pages/Admin/Products';
 import Orders from './pages/Admin/Orders';
 import Users from './pages/Admin/Users';
 import ProtectedRoute from './components/ProtectedRoute';
+import UserLayout from './pages/UserLayout';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
@@ -35,30 +40,36 @@ function App() {
       />
       <CartProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             {/* Public / User Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/katalog" element={<Katalog />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/my-orders" element={<MyOrders />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+            <Route element={<UserLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/katalog" element={<Katalog />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/how-to-buy" element={<HowToBuy />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/my-orders" element={<MyOrders />} />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
 
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />

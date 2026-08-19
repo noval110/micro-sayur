@@ -9,9 +9,11 @@ import {
   useNavigate
 } from 'react-router-dom';
 
-import Navbar from '../components/Navbar';
-
 import api from '../api';
+
+import {
+  useAuth
+} from '../context/AuthContext';
 
 import {
   useCart
@@ -95,6 +97,8 @@ const formatRupiah = (
 
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
+
   const navigate =
     useNavigate();
 
@@ -126,6 +130,54 @@ export default function Home() {
     toast,
     setToast
   ] = useState(null);
+
+  // =========================================
+  // TYPING EFFECT SEARCH PLACEHOLDER
+  // =========================================
+
+  const searchPhrases = useMemo(() => [
+    "Cari pisang, wortel, alpukat...",
+    "Cari sayuran hijau segar...",
+    "Cari bumbu dapur lengkap...",
+    "Belanja kebutuhan dapur..."
+  ], []);
+
+  const [placeholderText, setPlaceholderText] = useState("");
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showCursor, setShowCursor] = useState(true);
+
+  useEffect(() => {
+    const cursorInterval = setInterval(() => {
+      setShowCursor((prev) => !prev);
+    }, 500);
+    return () => clearInterval(cursorInterval);
+  }, []);
+
+  useEffect(() => {
+    const currentPhrase = searchPhrases[phraseIndex];
+    let typingSpeed = 100;
+
+    if (isDeleting) {
+      typingSpeed = 50;
+    }
+
+    const timer = setTimeout(() => {
+      if (!isDeleting && placeholderText === currentPhrase) {
+        setTimeout(() => setIsDeleting(true), 1500);
+      } else if (isDeleting && placeholderText === "") {
+        setIsDeleting(false);
+        setPhraseIndex((prevIndex) => (prevIndex + 1) % searchPhrases.length);
+      } else {
+        const nextText = isDeleting
+          ? currentPhrase.substring(0, placeholderText.length - 1)
+          : currentPhrase.substring(0, placeholderText.length + 1);
+        setPlaceholderText(nextText);
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timer);
+  }, [placeholderText, isDeleting, phraseIndex, searchPhrases]);
 
 
   // =========================================
@@ -377,10 +429,7 @@ export default function Home() {
   return (
     <div className="home-page">
 
-      <Navbar />
-
-
-      {/* =====================================
+      {/* =========================================
           TOAST
       ===================================== */}
 
@@ -521,7 +570,7 @@ export default function Home() {
 
               <input
                 type="text"
-                placeholder="Cari pisang, wortel, alpukat..."
+                placeholder={placeholderText + (showCursor ? '|' : '')}
                 value={
                   searchTerm
                 }
@@ -1129,157 +1178,6 @@ export default function Home() {
         </div>
 
       </section>
-
-
-      {/* =====================================
-          FOOTER
-      ===================================== */}
-
-      <footer className="home-footer">
-
-        <div className="home-footer-main">
-
-          {/* BRAND */}
-
-          <div className="home-footer-brand-column">
-
-            <Link
-              to="/"
-              className="home-footer-logo"
-            >
-              <span>
-                <IconLeaf
-                  size={20}
-                />
-              </span>
-
-              Sayur-day
-            </Link>
-
-            <p>
-              Supermarket online untuk
-              kebutuhan bahan dapur segar
-              sehari-hari dengan proses
-              belanja yang praktis.
-            </p>
-
-          </div>
-
-
-          {/* CATEGORY */}
-
-          <div className="home-footer-column">
-
-            <h4>
-              Kategori
-            </h4>
-
-            <Link
-              to="/katalog?category=Buah"
-            >
-              Buah-buahan
-            </Link>
-
-            <Link
-              to="/katalog?category=Sayur"
-            >
-              Sayuran
-            </Link>
-
-            <Link
-              to="/katalog?category=Umbi"
-            >
-              Umbi
-            </Link>
-
-            <Link
-              to="/katalog?category=Bumbu"
-            >
-              Bumbu Dapur
-            </Link>
-
-          </div>
-
-
-          {/* CUSTOMER */}
-
-          <div className="home-footer-column">
-
-            <h4>
-              Akun
-            </h4>
-
-            <Link
-              to="/profile"
-            >
-              Profil Saya
-            </Link>
-
-            <Link
-              to="/my-orders"
-            >
-              Pesanan Saya
-            </Link>
-
-            <Link
-              to="/cart"
-            >
-              Keranjang
-            </Link>
-
-            <Link
-              to="/katalog"
-            >
-              Katalog
-            </Link>
-
-          </div>
-
-
-          {/* HELP */}
-
-          <div className="home-footer-column">
-
-            <h4>
-              Bantuan
-            </h4>
-
-            <span>
-              Cara Pembelian
-            </span>
-
-            <span>
-              Pengembalian Barang
-            </span>
-
-            <span>
-              Syarat & Ketentuan
-            </span>
-
-            <span>
-              Kontak Kami
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div className="home-footer-bottom">
-
-          <span>
-            © 2026 Sayur-day.
-            All rights reserved.
-          </span>
-
-          <span>
-            Sayur segar untuk
-            kebutuhan harianmu 🌱
-          </span>
-
-        </div>
-
-      </footer>
 
     </div>
   );
