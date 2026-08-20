@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,6 +28,7 @@ type UserHandlerInterface interface {
 	CreateUserAccount(c echo.Context) error
 	GetAllUsers(c echo.Context) error
 	GetProfile(c echo.Context) error
+	InternalGetUserByID(c echo.Context) error
 	UpdateProfile(c echo.Context) error
 	UploadProfilePhoto(c echo.Context) error
 }
@@ -81,6 +83,56 @@ func (u *userHandler) GetProfile(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"message": err.Error(), "data": nil})
 	}
 	return c.JSON(http.StatusOK, echo.Map{"message": "success get profile", "data": profileData(user)})
+}
+
+func (u *userHandler) InternalGetUserByID(c echo.Context) error {
+	userID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || userID < 1 {
+		return c.JSON(http.StatusBadRequest, echo.Map{
+			"message": "user id tidak valid",
+		})
+	}
+
+	user, err := u.userService.GetProfile(c.Request().Context(), userID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{
+			"message": "user tidak ditemukan",
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"data": echo.Map{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+		},
+	})
+}
+
+func internalServiceAuth(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		expectedKey := os.Getenv("INTERNAL_SERVICE_KEY")
+		if expectedKey == "" {
+			return c.JSON(http.StatusInternalServerError, echo.Map{
+				"message": "internal service configuration error",
+			})
+		}
+
+		requestKey := c.Request().Header.Get("X-Internal-Key")
+		if requestKey == "" {
+			return c.JSON(http.StatusUnauthorized, echo.Map{
+				"message": "missing internal service key",
+			})
+		}
+
+		if subtle.ConstantTimeCompare([]byte(requestKey), []byte(expectedKey)) != 1 {
+			return c.JSON(http.StatusForbidden, echo.Map{
+				"message": "invalid internal service key",
+			})
+		}
+
+		return next(c)
+	}
 }
 
 func (u *userHandler) UpdateProfile(c echo.Context) error {
@@ -438,6 +490,16 @@ func NewUserHandler(
 	userHandler := &userHandler{
 		userService: userService,
 	}
+
+	internalGroup := e.Group(
+		"/internal",
+		internalServiceAuth,
+	)
+
+	internalGroup.GET(
+		"/users/:id",
+		userHandler.InternalGetUserByID,
+	)
 
 	// Recover dari panic
 	e.Use(middleware.Recover())

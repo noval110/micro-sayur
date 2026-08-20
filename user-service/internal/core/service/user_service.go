@@ -100,11 +100,31 @@ func (
 			req.Token,
 		)
 
-	messageParam :=
-		fmt.Sprintf(
-			"Please verify your account with click link below:%v",
-			urlVerify,
-		)
+	messageParam := fmt.Sprintf(`
+	<p>Halo!</p>
+	<p>Terima kasih sudah mendaftar di <strong>Sayur-day</strong>.</p>
+	<p>Silakan verifikasi akun kamu dengan menekan tombol berikut:</p>
+
+	<p style="margin:24px 0;">
+		<a href="%s"
+			style="
+				background:#16a34a;
+				color:#ffffff;
+				padding:12px 22px;
+				text-decoration:none;
+				border-radius:8px;
+				display:inline-block;
+				font-weight:bold;
+			">
+			Verifikasi Akun
+		</a>
+	</p>
+
+	<p style="font-size:13px;color:#666;">
+		Jika tombol tidak bisa digunakan, buka link berikut:<br>
+		<a href="%s">%s</a>
+	</p>
+`, urlVerify, urlVerify, urlVerify)
 
 	if err :=
 		massage.PublishMassage(

@@ -91,6 +91,30 @@ const formatRupiah = (
   );
 };
 
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://quirky_woz-48b.n.jrnm.app';
+
+const getProductImage = (image) => {
+  if (!image) return FALLBACK_IMG;
+
+  if (
+    image.startsWith('http://') ||
+    image.startsWith('https://') ||
+    image.startsWith('data:')
+  ) {
+    return image;
+  }
+
+  const cleanImage = image.replace(/^\/+/, '');
+
+  if (cleanImage.startsWith('uploads/')) {
+    return `${API_BASE}/${cleanImage}`;
+  }
+
+  return `${API_BASE}/uploads/${cleanImage}`;
+};
+
 
 export default function Home() {
   const navigate =
@@ -227,10 +251,10 @@ export default function Home() {
                 product.unit ||
                 'kg',
 
-              image:
+              image: getProductImage(
                 product.image ||
-                product.image_url ||
-                FALLBACK_IMG,
+                  product.image_url
+              ),
 
               rating:
                 Number(product.rating || 4.8)
@@ -380,9 +404,10 @@ export default function Home() {
           product.price
         ),
 
-      image:
+      image: getProductImage(
         product.image ||
-        FALLBACK_IMG,
+          product.image_url
+      ),
 
       unit:
         product.unit ||

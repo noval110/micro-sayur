@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"payment-service/internal/client"
 	"payment-service/internal/domain"
+	"payment-service/internal/massage"
 	"payment-service/internal/repository"
 )
 
@@ -32,10 +34,19 @@ type PaymentService interface {
 type paymentService struct {
 	repo        repository.PaymentRepository
 	orderClient client.OrderClient
+	userClient  client.UserClient
 }
 
-func NewPaymentService(repo repository.PaymentRepository, orderClient client.OrderClient) PaymentService {
-	return &paymentService{repo: repo, orderClient: orderClient}
+func NewPaymentService(
+	repo repository.PaymentRepository,
+	orderClient client.OrderClient,
+	userClient client.UserClient,
+) PaymentService {
+	return &paymentService{
+		repo:        repo,
+		orderClient: orderClient,
+		userClient:  userClient,
+	}
 }
 
 func (s *paymentService) Pay(ctx context.Context, userID int, req PayRequest) (*domain.Payment, error) {
@@ -100,6 +111,37 @@ func (s *paymentService) Pay(ctx context.Context, userID int, req PayRequest) (*
 		)
 	}
 	payment.Status = "SUCCESS"
+
+	user, err := s.userClient.GetUserByID(userID)
+	if err != nil {
+		log.Printf(
+			"gagal mengambil user untuk notifikasi: %v",
+			err,
+		)
+	} else {
+		message := fmt.Sprintf(
+			"Pembayaran untuk pesanan #%d sebesar Rp%.0f telah berhasil. Terima kasih sudah berbelanja di Sayur-day.",
+			req.OrderID,
+			payment.Amount,
+		)
+
+		if err := massage.PublishPaymentNotification(
+			user.Email,
+			"Pembayaran Berhasil - Sayur-day",
+			message,
+		); err != nil {
+			log.Printf(
+				"gagal publish notifikasi pembayaran: %v",
+				err,
+			)
+		} else {
+			log.Printf(
+				"notifikasi pembayaran berhasil dipublish untuk %s",
+				user.Email,
+			)
+		}
+	}
+
 	return payment, nil
 }
 

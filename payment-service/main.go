@@ -12,11 +12,14 @@ import (
 	"payment-service/internal/repository"
 	"payment-service/internal/service"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	_ = godotenv.Load()
+
 	db := config.InitDB()
 	defer db.Close()
 	e := echo.New()
@@ -54,13 +57,22 @@ func main() {
 	if orderURL == "" {
 		orderURL = "http://127.0.0.1:8082"
 	}
+	userURL := os.Getenv("USER_SERVICE_URL")
+	if userURL == "" {
+		userURL = "http://127.0.0.1:8080"
+	}
 	internalKey := os.Getenv("INTERNAL_SERVICE_KEY")
 	if internalKey == "" {
 		log.Fatal("INTERNAL_SERVICE_KEY wajib diisi")
 	}
 	orderClient := client.NewOrderClient(orderURL, internalKey)
+	userClient := client.NewUserClient(userURL, internalKey)
 	paymentRepo := repository.NewPaymentRepository(db)
-	paymentService := service.NewPaymentService(paymentRepo, orderClient)
+	paymentService := service.NewPaymentService(
+		paymentRepo,
+		orderClient,
+		userClient,
+	)
 	paymentHandler := handler.NewPaymentHandler(paymentService)
 	auth := authmiddleware.NewAuthMiddleware()
 
@@ -70,8 +82,8 @@ func main() {
 		return c.JSON(http.StatusOK, echo.Map{"service": "payment-service", "status": "healthy"})
 	})
 
-	log.Println("Payment-Service berjalan di port 8083...")
-	if err := e.Start(":8083"); err != nil {
+	log.Println("Payment-Service berjalan di port 8086...")
+	if err := e.Start(":8086"); err != nil {
 		log.Fatalf("Gagal menjalankan payment-service: %v", err)
 	}
 }

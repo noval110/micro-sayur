@@ -8,13 +8,12 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func PublishMassage(email, massage, notif_type string) error {
+func PublishMassage(email, message, notifType string) error {
 	conn, err := config.NewConfig().NewRabbitMQ()
 	if err != nil {
 		log.Errorf("[PublishMassage-1] Failed to connect to RabbitMQ: %v", err)
 		return err
 	}
-
 	defer conn.Close()
 
 	ch, err := conn.Channel()
@@ -22,18 +21,16 @@ func PublishMassage(email, massage, notif_type string) error {
 		log.Errorf("[PublishMassage-2] Failed to open a channel: %v", err)
 		return err
 	}
-
 	defer ch.Close()
 
 	queue, err := ch.QueueDeclare(
-		notif_type,
+		notifType,
 		true,
 		false,
 		false,
 		false,
 		nil,
 	)
-
 	if err != nil {
 		log.Errorf("[PublishMassage-3] Failed to declare a queue: %v", err)
 		return err
@@ -41,7 +38,8 @@ func PublishMassage(email, massage, notif_type string) error {
 
 	notification := map[string]string{
 		"email":   email,
-		"massage": massage,
+		"subject": "Verifikasi Email Sayur-day",
+		"message": message,
 	}
 
 	body, err := json.Marshal(notification)
@@ -56,9 +54,9 @@ func PublishMassage(email, massage, notif_type string) error {
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        body,
+			ContentType:  "application/json",
+			Body:         body,
+			DeliveryMode: amqp.Persistent,
 		},
 	)
-
 }

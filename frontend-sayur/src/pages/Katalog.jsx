@@ -25,6 +25,30 @@ import './Katalog.css';
 const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&auto=format&fit=crop&q=80';
 
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://quirky_woz-48b.n.jrnm.app';
+
+const getProductImage = (image) => {
+  if (!image) return FALLBACK_IMG;
+
+  if (
+    image.startsWith('http://') ||
+    image.startsWith('https://') ||
+    image.startsWith('data:')
+  ) {
+    return image;
+  }
+
+  const cleanImage = image.replace(/^\/+/, '');
+
+  if (cleanImage.startsWith('uploads/')) {
+    return `${API_BASE}/${cleanImage}`;
+  }
+
+  return `${API_BASE}/uploads/${cleanImage}`;
+};
+
 export default function Katalog() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -274,9 +298,10 @@ const handleAddToCart = (
       price:
         Number(product.price || 0),
 
-      image:
+      image: getProductImage(
         product.image ||
-        FALLBACK_IMG,
+          product.image_url
+      ),
 
       unit:
         product.unit ||
@@ -487,10 +512,10 @@ const handleAddToCart = (
                   >
                     <div className="katalog-card-image">
                       <img
-                        src={
+                        src={getProductImage(
                           product.image ||
-                          FALLBACK_IMG
-                        }
+                            product.image_url
+                        )}
                         alt={
                           product.name
                         }
