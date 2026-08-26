@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -526,71 +526,64 @@ func (h *productHandler) ReduceStock(
 		},
 	)
 }
-func getProductPublicBaseURL(c echo.Context) string {
-	configuredURL := strings.TrimSpace(
-		os.Getenv("PUBLIC_API_URL"),
+func uploadToSupabaseStorage(
+	fileName string,
+	contentType string,
+	fileData []byte,
+) (string, error) {
+	supabaseURL := os.Getenv("SUPABASE_URL")
+	serviceKey := os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
+	bucket := os.Getenv("SUPABASE_STORAGE_BUCKET")
+
+	if supabaseURL == "" || serviceKey == "" || bucket == "" {
+		return "", fmt.Errorf("supabase storage env belum lengkap")
+	}
+
+	objectPath := "products/" + fileName
+	uploadURL := fmt.Sprintf(
+		"%s/storage/v1/object/%s/%s",
+		strings.TrimRight(supabaseURL, "/"),
+		bucket,
+		objectPath,
 	)
 
-	requestHost := strings.TrimSpace(
-		c.Request().Host,
+	req, err := http.NewRequest(
+		http.MethodPost,
+		uploadURL,
+		bytes.NewReader(fileData),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+serviceKey)
+	req.Header.Set("apikey", serviceKey)
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("x-upsert", "true")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf(
+			"supabase upload gagal: status=%d body=%s",
+			resp.StatusCode,
+			string(body),
+		)
+	}
+
+	publicURL := fmt.Sprintf(
+		"%s/storage/v1/object/public/%s/%s",
+		strings.TrimRight(supabaseURL, "/"),
+		bucket,
+		objectPath,
 	)
 
-	isLocalURL := func(value string) bool {
-		value = strings.ToLower(value)
-
-		return strings.Contains(value, "localhost") ||
-			strings.Contains(value, "127.0.0.1")
-	}
-
-	isLocalHost := func(value string) bool {
-		value = strings.ToLower(value)
-
-		return strings.Contains(value, "localhost") ||
-			strings.HasPrefix(value, "127.0.0.1")
-	}
-
-	// Kalau PUBLIC_API_URL sudah domain production,
-	// gunakan itu.
-	if configuredURL != "" &&
-		!isLocalURL(configuredURL) {
-
-		return strings.TrimRight(
-			configuredURL,
-			"/",
-		)
-	}
-
-	// Kalau backend lokal diakses lewat Cloudflare Tunnel,
-	// Host request adalah *.trycloudflare.com.
-	if requestHost != "" &&
-		!isLocalHost(requestHost) {
-
-		scheme := strings.TrimSpace(
-			c.Request().
-				Header.
-				Get("X-Forwarded-Proto"),
-		)
-
-		if scheme == "" {
-			scheme = "https"
-		}
-
-		return fmt.Sprintf(
-			"%s://%s",
-			scheme,
-			requestHost,
-		)
-	}
-
-	// Local development biasa.
-	if configuredURL != "" {
-		return strings.TrimRight(
-			configuredURL,
-			"/",
-		)
-	}
-
-	return "http://localhost:8000"
+	return publicURL, nil
 }
 
 func (h *productHandler) UploadProductImage(
@@ -710,26 +703,6 @@ func (h *productHandler) UploadProductImage(
 		}
 	}
 
-	uploadDir :=
-		filepath.Join(
-			"uploads",
-			"products",
-		)
-
-	if err :=
-		os.MkdirAll(
-			uploadDir,
-			0755,
-		); err != nil {
-
-		return c.JSON(
-			http.StatusInternalServerError,
-			map[string]interface{}{
-				"message": "gagal membuat folder upload",
-			},
-		)
-	}
-
 	fileName :=
 		fmt.Sprintf(
 			"product-%d%s",
@@ -737,85 +710,41 @@ func (h *productHandler) UploadProductImage(
 			ext,
 		)
 
-	destination :=
-		filepath.Join(
-			uploadDir,
-			fileName,
-		)
-
-	dst, err :=
-		os.Create(
-			destination,
-		)
-
+	fileData, err := io.ReadAll(
+		io.LimitReader(src, maxImageSize+1),
+	)
 	if err != nil {
-
-		return c.JSON(
-			http.StatusInternalServerError,
-			map[string]interface{}{
-				"message": "gagal menyimpan gambar",
-			},
-		)
-	}
-
-	written, copyErr :=
-		io.Copy(
-			dst,
-			io.LimitReader(
-				src,
-				maxImageSize+1,
-			),
-		)
-
-	closeErr :=
-		dst.Close()
-
-	if copyErr != nil ||
-		closeErr != nil ||
-		written > maxImageSize {
-
-		_ =
-			os.Remove(
-				destination,
-			)
-
-		message :=
-			"gagal menyimpan gambar"
-
-		if written >
-			maxImageSize {
-
-			message =
-				"ukuran gambar maksimal 5 MB"
-		}
-
 		return c.JSON(
 			http.StatusBadRequest,
 			map[string]interface{}{
-				"message": message,
+				"message": "gagal membaca gambar",
 			},
 		)
 	}
 
-	baseURL :=
-		getProductPublicBaseURL(c)
-
-	imageURL :=
-		fmt.Sprintf(
-			"%s/uploads/products/%s",
-			strings.TrimRight(
-				baseURL,
-				"/",
-			),
-			fileName,
+	if len(fileData) > maxImageSize {
+		return c.JSON(
+			http.StatusBadRequest,
+			map[string]interface{}{
+				"message": "ukuran gambar maksimal 5 MB",
+			},
 		)
+	}
 
-	imageURL =
-		strings.ReplaceAll(
-			imageURL,
-			"\\",
-			"/",
+	imageURL, err := uploadToSupabaseStorage(
+		fileName,
+		contentType,
+		fileData,
+	)
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			map[string]interface{}{
+				"message": "gagal upload gambar ke storage",
+				"error":   err.Error(),
+			},
 		)
+	}
 
 	return c.JSON(
 		http.StatusOK,

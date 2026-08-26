@@ -113,9 +113,7 @@ export default function MyOrders() {
     });
 
 
-  // ========================================
   // FETCH
-  // ========================================
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -171,9 +169,7 @@ export default function MyOrders() {
   };
 
 
-  // ========================================
   // TOAST
-  // ========================================
 
   const showToast = (
     message,
@@ -195,9 +191,7 @@ export default function MyOrders() {
   };
 
 
-  // ========================================
   // FORMAT
-  // ========================================
 
   const formatRupiah = (value) =>
     Number(
@@ -259,9 +253,7 @@ export default function MyOrders() {
   };
 
 
-  // ========================================
   // STATUS
-  // ========================================
 
   const getStatus = (status) => {
     const value =
@@ -362,9 +354,7 @@ export default function MyOrders() {
   };
 
 
-  // ========================================
   // FILTER
-  // ========================================
 
   const filteredOrders =
     useMemo(() => {
@@ -434,9 +424,7 @@ export default function MyOrders() {
   };
 
 
-  // ========================================
   // PAYMENT
-  // ========================================
 
   const openPaymentModal = (
     order
@@ -611,9 +599,7 @@ export default function MyOrders() {
   };
 
 
-  // ========================================
   // PAYMENT RECEIPT
-  // ========================================
 
   const fetchPaymentDetail =
     async (order) => {
@@ -660,9 +646,7 @@ export default function MyOrders() {
     };
 
 
-  // ========================================
   // COPY
-  // ========================================
 
   const handleCopy = async () => {
     const info =
@@ -1166,9 +1150,7 @@ export default function MyOrders() {
       </main>
 
 
-      {/* ===================================
-          PAYMENT MODAL
-      =================================== */}
+      {/* PAYMENT MODAL */}
 
       {selectedOrder && (
         <div
@@ -1384,9 +1366,7 @@ export default function MyOrders() {
       )}
 
 
-      {/* ===================================
-          RECEIPT
-      =================================== */}
+      {/* RECEIPT */}
 
       {paymentDetail && (
         <div
@@ -1493,9 +1473,7 @@ export default function MyOrders() {
 }
 
 
-// ========================================
 // PAYMENT METHOD
-// ========================================
 
 function PaymentMethod({
   active,
@@ -1534,9 +1512,7 @@ function PaymentMethod({
 }
 
 
-// ========================================
 // RECEIPT ROW
-// ========================================
 
 function ReceiptRow({
   label,

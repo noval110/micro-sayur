@@ -149,9 +149,7 @@ export default function Home() {
     setToast
   ] = useState(null);
 
-  // =========================================
   // TYPING EFFECT SEARCH PLACEHOLDER
-  // =========================================
 
   const searchPhrases = useMemo(() => [
     "Cari pisang, wortel, alpukat...",
@@ -198,9 +196,7 @@ export default function Home() {
   }, [placeholderText, isDeleting, phraseIndex, searchPhrases]);
 
 
-  // =========================================
   // FETCH PRODUCTS
-  // =========================================
 
   const fetchProducts =
     async () => {
@@ -284,9 +280,7 @@ export default function Home() {
   }, []);
 
 
-  // =========================================
   // CATEGORIES
-  // =========================================
 
   const categories =
     useMemo(() => {
@@ -314,9 +308,7 @@ export default function Home() {
     }, [products]);
 
 
-  // =========================================
   // POPULAR PRODUCTS
-  // =========================================
 
   const popularProducts =
     useMemo(() => {
@@ -334,9 +326,7 @@ export default function Home() {
     }, [products]);
 
 
-  // =========================================
   // SEARCH
-  // =========================================
 
   const handleSearch = (
     event
@@ -359,9 +349,7 @@ export default function Home() {
   };
 
 
-  // =========================================
   // CATEGORY
-  // =========================================
 
   const handleCategory = (
     category
@@ -374,9 +362,7 @@ export default function Home() {
   };
 
 
-  // =========================================
   // CART
-  // =========================================
 
   const handleAddToCart = (
     product
@@ -423,9 +409,7 @@ export default function Home() {
   };
 
 
-  // =========================================
   // TOAST
-  // =========================================
 
   const showToast = (
     message,
@@ -448,9 +432,7 @@ export default function Home() {
   return (
     <div className="home-page">
 
-      {/* =========================================
-          TOAST
-      ===================================== */}
+      {/* TOAST */}
 
       {toast && (
         <div
@@ -517,9 +499,7 @@ export default function Home() {
       )}
 
 
-      {/* =====================================
-          HERO
-      ===================================== */}
+      {/* HERO */}
 
       <section className="home-hero-section">
 
@@ -674,9 +654,7 @@ export default function Home() {
       </section>
 
 
-      {/* =====================================
-          CATEGORIES
-      ===================================== */}
+      {/* CATEGORIES */}
 
       <section className="home-section">
 
@@ -761,9 +739,7 @@ export default function Home() {
       </section>
 
 
-      {/* =====================================
-          PROMO
-      ===================================== */}
+      {/* PROMO */}
 
       <section className="home-section">
 
@@ -847,9 +823,7 @@ export default function Home() {
       </section>
 
 
-      {/* =====================================
-          PRODUCTS
-      ===================================== */}
+      {/* PRODUCTS */}
 
       <section className="home-section">
 
@@ -1098,9 +1072,7 @@ export default function Home() {
       </section>
 
 
-      {/* =====================================
-          BENEFITS
-      ===================================== */}
+      {/* BENEFITS */}
 
       <section className="home-benefits">
 

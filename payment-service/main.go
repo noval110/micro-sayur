@@ -82,8 +82,13 @@ func main() {
 		return c.JSON(http.StatusOK, echo.Map{"service": "payment-service", "status": "healthy"})
 	})
 
-	log.Println("Payment-Service berjalan di port 8086...")
-	if err := e.Start(":8086"); err != nil {
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = "8086"
+	}
+
+	log.Printf("Payment-Service berjalan di port %s...", port)
+	if err := e.Start(":" + port); err != nil {
 		log.Fatalf("Gagal menjalankan payment-service: %v", err)
 	}
 }

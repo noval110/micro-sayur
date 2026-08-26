@@ -31,10 +31,7 @@ services:
       timeout: 5s
       retries: 10
 
-
-  # ==========================================
   # PRODUCT SERVICE
-  # ==========================================
 
   product-service:
     build:
@@ -49,24 +46,25 @@ services:
       - ./produk-service/uploads:/app/uploads
 
     environment:
-      APP_PORT: "8081"
 
-      DATABASE_HOST: postgres
-      DATABASE_PORT: "5432"
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgrespassword
-      DATABASE_NAME: sayur_product_db
+      APP_PORT: 8081
+      APP_ENV: development
 
+      DATABASE_HOST: ${PRODUCT_DATABASE_HOST}
+      DATABASE_PORT: ${PRODUCT_DATABASE_PORT}
+      DATABASE_USER: ${PRODUCT_DATABASE_USER}
+      DATABASE_PASSWORD: ${PRODUCT_DATABASE_PASSWORD}
+      DATABASE_NAME: ${PRODUCT_DATABASE_NAME}
+      DATABASE_MAX_OPEN_CONNECTIONS: 10
+      DATABASE_MAX_IDLE_CONNECTIONS: 5
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      SUPABASE_STORAGE_BUCKET: ${SUPABASE_STORAGE_BUCKET}
+      USER_SERVICE_URL: http://user-service:8084
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
 
-    depends_on:
-      postgres:
-        condition: service_healthy
 
-
-  # ==========================================
   # ORDER SERVICE
-  # ==========================================
 
   order-service:
     build:
@@ -78,28 +76,25 @@ services:
       - "8082:8082"
 
     environment:
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_USER: postgres
-      DB_PASSWORD: postgrespassword
-      DB_NAME: sayur_order_db
+      APP_PORT: "8082"
+
+      DB_HOST: ${ORDER_DB_HOST}
+      DB_PORT: ${ORDER_DB_PORT}
+      DB_USER: ${ORDER_DB_USER}
+      DB_PASSWORD: ${ORDER_DB_PASSWORD}
+      DB_NAME: ${ORDER_DB_NAME}
 
       PRODUCT_SERVICE_URL: http://product-service:8081
+      USER_SERVICE_URL: http://user-service:8084
 
-      # Dipakai untuk komunikasi internal.
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
 
     depends_on:
-      postgres:
-        condition: service_healthy
-
       product-service:
         condition: service_started
 
 
-  # ==========================================
   # PAYMENT SERVICE
-  # ==========================================
 
   payment-service:
     build:
@@ -111,24 +106,22 @@ services:
       - "8083:8083"
 
     environment:
-      # Database payment
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_USER: postgres
-      DB_PASSWORD: postgrespassword
-      DB_NAME: sayur_payment_db
+      APP_PORT: "8083"
 
-      # Service communication
+      DB_HOST: ${PAYMENT_DB_HOST}
+      DB_PORT: ${PAYMENT_DB_PORT}
+      DB_USER: ${PAYMENT_DB_USER}
+      DB_PASSWORD: ${PAYMENT_DB_PASSWORD}
+      DB_NAME: ${PAYMENT_DB_NAME}
+
       ORDER_SERVICE_URL: http://order-service:8082
       USER_SERVICE_URL: http://user-service:8084
 
-      # Harus sama dengan order-service
+      RABBITMQ_URL: ${RABBITMQ_URL}
+
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
 
     depends_on:
-      postgres:
-        condition: service_healthy
-
       order-service:
         condition: service_started
 
@@ -136,9 +129,7 @@ services:
         condition: service_started
 
 
-  # ==========================================
   # REDIS
-  # ==========================================
 
   redis:
     image: redis:7-alpine
@@ -158,9 +149,7 @@ services:
       retries: 10
 
 
-  # ==========================================
   # RABBITMQ
-  # ==========================================
 
   rabbitmq:
     image: rabbitmq:3-alpine
@@ -185,9 +174,7 @@ services:
       retries: 10
 
 
-  # ==========================================
   # USER SERVICE
-  # ==========================================
 
   user-service:
     build:
@@ -204,37 +191,25 @@ services:
     environment:
       APP_PORT: "8084"
 
-      DATABASE_HOST: postgres
-      DATABASE_PORT: "5432"
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgrespassword
-      DATABASE_NAME: sayur_user_db
+      DATABASE_HOST: ${USER_DATABASE_HOST}
+      DATABASE_PORT: ${USER_DATABASE_PORT}
+      DATABASE_USER: ${USER_DATABASE_USER}
+      DATABASE_PASSWORD: ${USER_DATABASE_PASSWORD}
+      DATABASE_NAME: ${USER_DATABASE_NAME}
+
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
 
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_ISSUER: micro-sayur
 
-      REDIS_HOST: redis
-      REDIS_PORT: "6379"
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_TLS: ${REDIS_TLS}
 
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: "5672"
-      RABBITMQ_USER: sayur
-      RABBITMQ_PASSWORD: sayurpassword
+      RABBITMQ_URL: ${RABBITMQ_URL}
 
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-      redis:
-        condition: service_healthy
-
-      rabbitmq:
-        condition: service_healthy
-
-
-  # ==========================================
   # API GATEWAY
-  # ==========================================
 
   api-gateway:
     image: nginx:alpine

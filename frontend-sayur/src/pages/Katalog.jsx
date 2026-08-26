@@ -158,14 +158,26 @@ const filteredProducts = useMemo(() => {
         const matchSearch =
           name.includes(keyword);
 
-        const matchCategory =
-          selectedCategory === 'Semua' ||
-          category === selectedCategory;
+      const categoryMap = {
+        Sayur : ['Sayur', 'Sayur Daun', 'Buah Sayur'],
+        Buah : ['Buah'],
+        Umbi : ['Umbi'],
+        Bumbu : ['Bumbu'],
+      };
 
-        return (
-          matchSearch &&
-          matchCategory
-        );
+      const allowedCategories =
+        categoryMap[selectedCategory] ||
+        [selectedCategory];
+
+      const matchCategory =
+        selectedCategory === 'Semua' ||
+        allowedCategories.includes(category);
+
+      return (
+        matchSearch &&
+        matchCategory
+      );
+         
       }
     );
 

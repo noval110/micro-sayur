@@ -632,9 +632,7 @@
     justify-content: space-between;
   }
 
-  /* ==========================================
-    NAV LINKS MODERN (BERANDA, KATALOG, ETC)
-    ========================================== */
+  /* NAV LINKS MODERN (BERANDA, KATALOG, ETC) */
   .nav-links-middle {
     display: flex;
     align-items: center;
@@ -663,9 +661,7 @@
     transform: scale(0.96);
   }
 
-  /* ==========================================
-    ACTIONS (CART & USER)
-    ========================================== */
+  /* ACTIONS (CART & USER) */
   .nav-actions {
     display: flex;
     align-items: center;
@@ -4007,9 +4003,7 @@
   }
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-  /* ==========================================
-    GLOBAL RESET & TYPOGRAPHY
-    ========================================== */
+  /* GLOBAL RESET & TYPOGRAPHY */
   * {
     box-sizing: border-box;
   }
@@ -4048,9 +4042,7 @@
     transform: scale(0.96) !important;
   }
 
-  /* ==========================================
-    1. HERO BANNER
-    ========================================== */
+  /* 1. HERO BANNER */
   .hero-section {
     max-width: 1200px;
     margin: 18px auto;
@@ -4163,9 +4155,7 @@
     transform: scale(1.03);
   }
 
-  /* ==========================================
-    2. FEATURED CATEGORIES
-    ========================================== */
+  /* 2. FEATURED CATEGORIES */
   .categories-section {
     max-width: 1200px;
     margin: 36px auto;
@@ -4221,9 +4211,7 @@
     font-size: 0.9rem;
   }
 
-  /* ==========================================
-    3. POPULAR PRODUCTS
-    ========================================== */
+  /* 3. POPULAR PRODUCTS */
   .products-section-home {
     max-width: 1200px;
     margin: 36px auto;
@@ -4381,9 +4369,7 @@
     gap: 6px;
   }
 
-  /* ==========================================
-    4. FEATURES BAR
-    ========================================== */
+  /* 4. FEATURES BAR */
   .features-bar {
     background-color: #ffffff;
     border-top: 1px solid #e2e8f0;
@@ -4421,9 +4407,7 @@
     font-size: 0.8rem;
   }
 
-  /* ==========================================
-    5. FOOTER (WHITE THEME)
-    ========================================== */
+  /* 5. FOOTER (WHITE THEME) */
   .footer-fresh {
     background-color: #ffffff;
     color: #64748b;

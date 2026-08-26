@@ -149,8 +149,7 @@ func sendEmail(to, subject, body string) error {
 </html>
 `, body)
 
-	message := []byte(
-		fmt.Sprintf(
+	message := fmt.Appendf(nil, 
 			"From: %s <%s>\r\n"+
 				"To: %s\r\n"+
 				"Subject: %s\r\n"+
@@ -163,8 +162,7 @@ func sendEmail(to, subject, body string) error {
 			to,
 			subject,
 			htmlBody,
-		),
-	)
+		)
 
 	if _, err := writer.Write(message); err != nil {
 		return fmt.Errorf("write email: %w", err)
