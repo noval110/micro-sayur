@@ -36,7 +36,7 @@ export default function Contact() {
               <div className="contact-icon-box blue"><IconPhone size={22} /></div>
               <div className="contact-details">
                 <h4>Telepon / WhatsApp</h4>
-                <p className="highlight-text">+62 811-2233-4455</p>
+                <p className="highlight-text">+62 895-0906-6231</p>
                 <span>Senin - Jumat, 08:00 - 17:00 WIB</span>
               </div>
             </div>
@@ -45,7 +45,7 @@ export default function Contact() {
               <div className="contact-icon-box amber"><IconMail size={22} /></div>
               <div className="contact-details">
                 <h4>Email Dukungan</h4>
-                <p>halo@sayur-day.id</p>
+                <p>novalahmadanur@gmail.com</p>
                 <p>mitra@sayur-day.id</p>
               </div>
             </div>
