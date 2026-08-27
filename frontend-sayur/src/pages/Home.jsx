@@ -508,7 +508,7 @@ export default function Home() {
           <div className="home-hero-content">
 
             <span className="home-hero-badge">
-              🌱 Segar setiap hari
+              Segar setiap hari
             </span>
 
 
