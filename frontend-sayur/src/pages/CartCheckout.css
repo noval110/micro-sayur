@@ -4,9 +4,9 @@
 /* Base */
 
 .cc-page {
-  --cc-green: #0aad0a;
-  --cc-green-dark: #078707;
-  --cc-green-soft: #efffed;
+  --cc-green: var(--brand-green);
+  --cc-green-dark: var(--brand-green-hover);
+  --cc-green-soft: var(--brand-green-soft);
 
   --cc-heading: #21313c;
   --cc-text: #5c6c75;

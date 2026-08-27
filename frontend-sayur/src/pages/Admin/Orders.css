@@ -19,7 +19,7 @@
 .orders-eyebrow {
   display: inline-block;
   margin-bottom: 6px;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -64,7 +64,7 @@
 }
 
 .orders-refresh-btn:hover:not(:disabled) {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   background: #f7fff7;
 }
 
@@ -107,7 +107,7 @@
   flex: 0 0 43px;
   border-radius: 11px;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .orders-summary-card strong {
@@ -164,7 +164,7 @@
 }
 
 .orders-search-box:focus-within {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
@@ -257,7 +257,7 @@
   flex: 0 0 42px;
   border-radius: 11px;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .order-main-info h3 {
@@ -327,7 +327,7 @@
   flex: 0 0 36px;
   border-radius: 9px;
   background: #f5faf5;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .order-product-main strong {
@@ -364,7 +364,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-family: inherit;
   font-size: 0.75rem;
   font-weight: 700;
@@ -385,7 +385,7 @@
 .order-address svg {
   flex-shrink: 0;
   margin-top: 1px;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .order-address strong {
@@ -421,7 +421,7 @@
 
 .order-total-value {
   display: block;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-family: Outfit, Inter, sans-serif;
   font-size: 1.2rem;
   font-weight: 800;
@@ -454,8 +454,8 @@
 }
 
 .order-detail-btn:hover {
-  border-color: #0aad0a;
-  color: #0aad0a;
+  border-color: var(--brand-green);
+  color: var(--brand-green);
 }
 
 .order-actions {
@@ -465,8 +465,8 @@
 }
 
 .order-action-primary {
-  border: 1px solid #0aad0a;
-  background: #0aad0a;
+  border: 1px solid var(--brand-green);
+  background: var(--brand-green);
   color: #ffffff;
 }
 
@@ -550,7 +550,7 @@
   margin-bottom: 15px;
   border-radius: 16px;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .orders-state h3 {
@@ -659,7 +659,7 @@
   padding: 13px;
   border: 1px solid #e6e9e8;
   border-radius: 11px;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .order-detail-info-card span {
@@ -728,7 +728,7 @@
   padding: 12px;
   border-radius: 10px;
   background: #f8faf9;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .order-detail-notes {
@@ -765,7 +765,7 @@
 }
 
 .order-detail-total strong {
-  color: #0aad0a;
+  color: var(--brand-green);
   font-family: Outfit, Inter, sans-serif;
   font-size: 1.3rem;
 }
@@ -864,7 +864,7 @@
 
 .order-confirm-submit.processing,
 .order-confirm-submit.done {
-  background: #0aad0a;
+  background: var(--brand-green);
 }
 
 .order-confirm-submit.shipped {

@@ -186,9 +186,9 @@
 
 
 .dashboard-stat-icon.product {
-  background: #efffed;
+  background: var(--brand-green-soft);
 
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 

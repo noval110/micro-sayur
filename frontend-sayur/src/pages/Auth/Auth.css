@@ -2,9 +2,9 @@
 
 
 .auth-page {
-  --auth-green: #0aad0a;
-  --auth-green-dark: #078707;
-  --auth-green-soft: #efffed;
+  --auth-green: var(--brand-green);
+  --auth-green-dark: var(--brand-green-hover);
+  --auth-green-soft: var(--brand-green-soft);
 
   --auth-heading: #21313c;
   --auth-text: #5c6c75;

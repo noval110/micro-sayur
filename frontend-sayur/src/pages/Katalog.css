@@ -2,9 +2,9 @@
 
 
 .katalog-page {
-  --katalog-green: #0aad0a;
-  --katalog-green-dark: #078707;
-  --katalog-green-soft: #efffed;
+  --katalog-green: var(--brand-green);
+  --katalog-green-dark: var(--brand-green-hover);
+  --katalog-green-soft: var(--brand-green-soft);
 
   --katalog-heading: #21313c;
   --katalog-text: #5c6c75;

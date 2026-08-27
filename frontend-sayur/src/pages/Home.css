@@ -4,9 +4,9 @@
 /* Variables */
 
 .home-page {
-  --home-green: #0aad0a;
-  --home-green-dark: #078707;
-  --home-green-soft: #efffed;
+  --home-green: var(--brand-green);
+  --home-green-dark: var(--brand-green-hover);
+  --home-green-soft: var(--brand-green-soft);
 
   --home-yellow: #ffc107;
   --home-yellow-soft: #fff8df;

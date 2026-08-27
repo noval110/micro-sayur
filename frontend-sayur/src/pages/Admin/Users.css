@@ -21,7 +21,7 @@
 .users-eyebrow {
   display: inline-block;
   margin-bottom: 6px;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-size: 0.73rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -65,9 +65,9 @@
 }
 
 .users-refresh:hover:not(:disabled) {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   background: #f8fff8;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-refresh:disabled {
@@ -139,7 +139,7 @@
 
 .users-stat-icon.green {
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-stat-icon.blue {
@@ -234,7 +234,7 @@
 }
 
 .users-search:focus-within {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow:
     0 0 0 3px
     rgba(10, 173, 10, 0.08);
@@ -270,7 +270,7 @@
 }
 
 .users-filter:focus {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow:
     0 0 0 3px
     rgba(10, 173, 10, 0.08);
@@ -344,7 +344,7 @@
   overflow: hidden;
   border-radius: 50%;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-avatar img {
@@ -459,7 +459,7 @@
   border: 1px solid #d8e8dd;
   border-radius: 9px;
   background: #ffffff;
-  color: #0aad0a;
+  color: var(--brand-green);
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -468,7 +468,7 @@
 }
 
 .users-detail-button:hover {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   background: #f5fff5;
 }
 
@@ -491,7 +491,7 @@
 
 .users-state > svg {
   margin-bottom: 12px;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-state-icon {
@@ -503,7 +503,7 @@
   margin-bottom: 13px;
   border-radius: 15px;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-state strong {
@@ -562,7 +562,7 @@
 .users-modal-header > div > span {
   display: block;
   margin-bottom: 4px;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -624,7 +624,7 @@
   overflow: hidden;
   border-radius: 50%;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-profile-avatar img {
@@ -677,7 +677,7 @@
   flex: 0 0 38px;
   border-radius: 9px;
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-detail-item span {
@@ -707,7 +707,7 @@
   padding: 13px;
   border-radius: 11px;
   background: #f8faf9;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .users-address svg {

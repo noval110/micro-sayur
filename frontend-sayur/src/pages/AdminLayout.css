@@ -4,9 +4,9 @@
 /* Base */
 
 .admin-shell {
-  --admin-green: #0aad0a;
-  --admin-green-dark: #078707;
-  --admin-green-soft: #efffed;
+  --admin-green: var(--brand-green);
+  --admin-green-dark: var(--brand-green-hover);
+  --admin-green-soft: var(--brand-green-soft);
 
   --admin-heading: #21313c;
   --admin-text: #5c6c75;

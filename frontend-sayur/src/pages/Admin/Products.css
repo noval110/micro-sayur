@@ -21,7 +21,7 @@
 .products-eyebrow {
   display: inline-block;
   margin-bottom: 6px;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-size: 0.73rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -79,14 +79,14 @@
 }
 
 .products-refresh:hover:not(:disabled) {
-  border-color: #0aad0a;
-  color: #0aad0a;
+  border-color: var(--brand-green);
+  color: var(--brand-green);
   background: #f8fff8;
 }
 
 .products-add-button {
-  border: 1px solid #0aad0a;
-  background: #0aad0a;
+  border: 1px solid var(--brand-green);
+  background: var(--brand-green);
   color: #ffffff;
 }
 
@@ -170,7 +170,7 @@
 
 .products-stat-icon.green {
   background: #efffef;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .products-stat-icon.blue {
@@ -261,7 +261,7 @@
 }
 
 .products-search:focus-within {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
@@ -297,7 +297,7 @@
 }
 
 .products-filter:focus {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
@@ -507,7 +507,7 @@
 
 .products-state svg {
   margin-bottom: 12px;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .products-state strong {
@@ -564,7 +564,7 @@
 .products-modal-header > div > span {
   display: block;
   margin-bottom: 4px;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -661,7 +661,7 @@
 
 .products-field input:focus,
 .products-field select:focus {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
@@ -762,8 +762,8 @@
 }
 
 .products-submit {
-  border: 1px solid #0aad0a;
-  background: #0aad0a;
+  border: 1px solid var(--brand-green);
+  background: var(--brand-green);
   color: #ffffff;
 }
 

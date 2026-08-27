@@ -4,9 +4,9 @@
 /* Root Navbar */
 
 .navbar-header {
-  --nav-green: #0aad0a;
-  --nav-green-dark: #078707;
-  --nav-green-soft: #efffed;
+  --nav-green: var(--brand-green);
+  --nav-green-dark: var(--brand-green-hover);
+  --nav-green-soft: var(--brand-green-soft);
 
   --nav-heading: #21313c;
   --nav-text: #5c6c75;
@@ -770,7 +770,7 @@
 
 .navbar-dropdown-item:hover {
   background: #f4fbf4;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 
@@ -1214,7 +1214,7 @@
 
 .navbar-nav-admin {
   color:
-    #078707;
+    var(--brand-green-hover);
 }
 
 

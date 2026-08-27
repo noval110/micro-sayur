@@ -168,7 +168,7 @@ export function CartProvider({ children }) {
             borderRadius: '16px',
             border: '1px solid #e5e7eb',
             boxShadow: '0 14px 35px rgba(33, 49, 60, 0.16)',
-            borderLeft: '5px solid #0aad0a',
+            borderLeft: '5px solid var(--brand-green)',
             transform: t.visible
               ? 'translateY(0)'
               : 'translateY(-10px)',
@@ -235,7 +235,7 @@ export function CartProvider({ children }) {
             }}
             style={{
               border: 'none',
-              background: '#0aad0a',
+              background: 'var(--brand-green)',
               color: '#fff',
               fontSize: '12px',
               fontWeight: '700',

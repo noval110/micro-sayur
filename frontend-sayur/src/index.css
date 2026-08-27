@@ -5,6 +5,9 @@
 @tailwind utilities;
 
 :root {
+  --brand-green: #0aad0a;
+  --brand-green-hover: #089608;
+  --brand-green-soft: #eaf8ea;
   --primary: #059669;
   --primary-hover: #047857;
   --primary-light: #ecfdf5;
@@ -122,4 +125,4 @@ h1, h2, h3, h4, h5, h6 {
 .product-card-fresh:hover, .katalog-card:hover {
   transform: translateY(-5px) scale(1.01) !important;
   box-shadow: var(--shadow-md) !important;
-} 
+}

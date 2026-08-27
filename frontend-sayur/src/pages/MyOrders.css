@@ -4,9 +4,9 @@
 /* Base */
 
 .orders-page {
-  --orders-green: #0aad0a;
-  --orders-green-dark: #078707;
-  --orders-green-soft: #efffed;
+  --orders-green: var(--brand-green);
+  --orders-green-dark: var(--brand-green-hover);
+  --orders-green-soft: var(--brand-green-soft);
 
   --orders-heading: #21313c;
   --orders-text: #5c6c75;

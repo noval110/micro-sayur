@@ -5,7 +5,7 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #0aad0a;
+  background: var(--brand-green);
   color: white;
   border: none;
   display: flex;
@@ -19,7 +19,7 @@
 }
 
 .back-to-top-btn:hover {
-  background: #078707;
+  background: var(--brand-green-hover);
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(10, 173, 10, 0.5);
 }

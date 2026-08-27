@@ -22,7 +22,7 @@
 .profile-eyebrow {
   display: block;
   margin-bottom: 5px;
-  color: #0aad0a;
+  color: var(--brand-green);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -99,7 +99,7 @@
   border: 4px solid #efffef;
   border-radius: 50%;
   background: #f1faf1;
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 .profile-photo img {
@@ -125,8 +125,8 @@
 }
 
 .profile-photo-button:hover {
-  border-color: #0aad0a;
-  color: #0aad0a;
+  border-color: var(--brand-green);
+  color: var(--brand-green);
 }
 
 .profile-photo-button input {
@@ -242,7 +242,7 @@
 
 .profile-input-wrapper:focus-within,
 .profile-textarea-wrapper:focus-within {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
@@ -303,7 +303,7 @@
 }
 
 .profile-field > input:focus {
-  border-color: #0aad0a;
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 3px rgba(10, 173, 10, 0.08);
 }
 
@@ -323,7 +323,7 @@
   padding: 0 17px;
   border: none;
   border-radius: 9px;
-  background: #0aad0a;
+  background: var(--brand-green);
   color: #ffffff;
   font-family: inherit;
   font-size: 0.78rem;
@@ -353,7 +353,7 @@
 }
 
 .profile-loading svg {
-  color: #0aad0a;
+  color: var(--brand-green);
 }
 
 /* TOAST */

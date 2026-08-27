@@ -44,7 +44,7 @@ function AuthPage() {
     <div style={{ minHeight: '100vh', backgroundColor: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif' }}>
       <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px', border: '1px solid #dcfce7' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: '#0aad0a', margin: 0 }}>🛒 Bubadibako Chart</h1>
+          <h1 style={{ fontSize: '26px', fontWeight: 'bold', color: 'var(--brand-green)', margin: 0 }}>🛒 Bubadibako Chart</h1>
           <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '6px' }}>
             {isLogin ? 'Silakan login untuk mulai bertransaksi' : 'Daftar akun kasir baru'}
           </p>
@@ -98,7 +98,7 @@ function AuthPage() {
           <button 
             type="submit" 
             disabled={loading}
-            style={{ width: '100%', backgroundColor: '#0aad0a', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', marginTop: '10px' }}>
+            style={{ width: '100%', backgroundColor: 'var(--brand-green)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', marginTop: '10px' }}>
             {loading ? 'Memproses...' : (isLogin ? 'Masuk (Login)' : 'Daftar Akun')}
           </button>
         </form>
@@ -108,7 +108,7 @@ function AuthPage() {
           <button 
             type="button"
             onClick={() => { setIsLogin(!isLogin); setErrorMsg(''); setSuccessMsg(''); }}
-            style={{ background: 'none', border: 'none', color: '#0aad0a', fontWeight: 'bold', cursor: 'pointer', padding: 0, fontSize: '13px' }}
+            style={{ background: 'none', border: 'none', color: 'var(--brand-green)', fontWeight: 'bold', cursor: 'pointer', padding: 0, fontSize: '13px' }}
           >
             {isLogin ? 'Daftar di sini' : 'Login di sini'}
           </button>
@@ -257,7 +257,7 @@ function KatalogPage() {
       </div>
 
       <header style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb', padding: '15px 30px', position: 'sticky', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 'bold', color: '#0aad0a', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 'bold', color: 'var(--brand-green)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
           🛒 Bubadibako Chart <span style={{ fontSize: '13px', color: '#6b7280', fontWeight: 'normal' }}>| POS Kasir</span>
         </h1>
 
@@ -274,7 +274,7 @@ function KatalogPage() {
         <div>
           <button 
             onClick={() => setShowAddModal(true)}
-            style={{ backgroundColor: '#0aad0a', color: 'white', border: 'none', padding: '9px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>
+            style={{ backgroundColor: 'var(--brand-green)', color: 'white', border: 'none', padding: '9px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>
             + Tambah Produk
           </button>
         </div>
@@ -296,28 +296,28 @@ function KatalogPage() {
       <div style={{ display: 'flex', flex: 1, maxWidth: '1400px', width: '100%', margin: '20px auto', padding: '0 20px', gap: '20px', boxSizing: 'border-box' }}>
         
         <aside style={{ width: '240px', backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px', height: 'fit-content', border: '1px solid #e5e7eb', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#1f2937', marginBottom: '15px', borderBottom: '2px solid #0aad0a', paddingBottom: '8px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#1f2937', marginBottom: '15px', borderBottom: '2px solid var(--brand-green)', paddingBottom: '8px' }}>
             Kategori Produk
           </h3>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px' }}>
             <li 
               onClick={() => setSelectedCategory('Semua')}
-              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Semua' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Semua' ? '#0aad0a' : '#4b5563', fontWeight: selectedCategory === 'Semua' ? '600' : 'normal', cursor: 'pointer' }}>
+              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Semua' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Semua' ? 'var(--brand-green)' : '#4b5563', fontWeight: selectedCategory === 'Semua' ? '600' : 'normal', cursor: 'pointer' }}>
               📁 Semua Produk
             </li>
             <li 
               onClick={() => setSelectedCategory('Sayuran')}
-              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Sayuran' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Sayuran' ? '#0aad0a' : '#4b5563', fontWeight: selectedCategory === 'Sayuran' ? '600' : 'normal', cursor: 'pointer' }}>
+              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Sayuran' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Sayuran' ? 'var(--brand-green)' : '#4b5563', fontWeight: selectedCategory === 'Sayuran' ? '600' : 'normal', cursor: 'pointer' }}>
               🥦 Sayuran Segar
             </li>
             <li 
               onClick={() => setSelectedCategory('Umbi')}
-              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Umbi' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Umbi' ? '#0aad0a' : '#4b5563', fontWeight: selectedCategory === 'Umbi' ? '600' : 'normal', cursor: 'pointer' }}>
+              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Umbi' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Umbi' ? 'var(--brand-green)' : '#4b5563', fontWeight: selectedCategory === 'Umbi' ? '600' : 'normal', cursor: 'pointer' }}>
               🥔 Umbi & Rempah
             </li>
             <li 
               onClick={() => setSelectedCategory('Buah')}
-              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Buah' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Buah' ? '#0aad0a' : '#4b5563', fontWeight: selectedCategory === 'Buah' ? '600' : 'normal', cursor: 'pointer' }}>
+              style={{ padding: '10px 12px', borderRadius: '8px', backgroundColor: selectedCategory === 'Buah' ? '#f0fdf4' : 'transparent', color: selectedCategory === 'Buah' ? 'var(--brand-green)' : '#4b5563', fontWeight: selectedCategory === 'Buah' ? '600' : 'normal', cursor: 'pointer' }}>
               🍎 Buah-Buahan
             </li>
           </ul>
@@ -341,7 +341,7 @@ function KatalogPage() {
                     <div style={{ backgroundColor: '#f8fafc', height: '120px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', marginBottom: '10px', border: '1px dashed #cbd5e1' }}>
                       📦
                     </div>
-                    <span style={{ fontSize: '10px', fontWeight: 'bold', color: '#0aad0a', backgroundColor: '#f0fdf4', padding: '3px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--brand-green)', backgroundColor: '#f0fdf4', padding: '3px 6px', borderRadius: '4px', textTransform: 'uppercase' }}>
                       {product.category || 'Umum'}
                     </span>
                     <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#1f2937', margin: '8px 0 4px 0' }}>
@@ -359,7 +359,7 @@ function KatalogPage() {
                     <button 
                       onClick={() => addToCart(product)}
                       disabled={(product.stock || 0) <= 0}
-                      style={{ backgroundColor: (product.stock || 0) <= 0 ? '#9ca3af' : '#0aad0a', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: (product.stock || 0) <= 0 ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '12px' }}>
+                      style={{ backgroundColor: (product.stock || 0) <= 0 ? '#9ca3af' : 'var(--brand-green)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: (product.stock || 0) <= 0 ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '12px' }}>
                       {(product.stock || 0) <= 0 ? 'Habis' : '+ Tambah'}
                     </button>
                   </div>
@@ -403,11 +403,11 @@ function KatalogPage() {
               <div style={{ borderTop: '2px dashed #e5e7eb', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 'bold' }}>
                   <span>Total:</span>
-                  <span style={{ color: '#0aad0a' }}>Rp {totalPrice.toLocaleString('id-ID')}</span>
+                  <span style={{ color: 'var(--brand-green)' }}>Rp {totalPrice.toLocaleString('id-ID')}</span>
                 </div>
                 <button 
                   onClick={handleCheckout}
-                  style={{ width: '100%', backgroundColor: '#0aad0a', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>
+                  style={{ width: '100%', backgroundColor: 'var(--brand-green)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }}>
                   Proses Bayar & Cetak Nota
                 </button>
               </div>
@@ -484,7 +484,7 @@ function KatalogPage() {
                 </button>
                 <button 
                   type="submit" 
-                  style={{ flex: 1, backgroundColor: '#0aad0a', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                  style={{ flex: 1, backgroundColor: 'var(--brand-green)', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
                   Simpan
                 </button>
               </div>
@@ -497,7 +497,7 @@ function KatalogPage() {
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(2px)' }}>
           <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '16px', width: '100%', maxWidth: '380px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', fontFamily: 'monospace' }}>
             <div style={{ textAlign: 'center', borderBottom: '1px dashed #cbd5e1', paddingBottom: '15px', marginBottom: '15px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px', color: '#0aad0a' }}>🛒 BUBADIBAKO CHART</h2>
+              <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--brand-green)' }}>🛒 BUBADIBAKO CHART</h2>
               <p style={{ margin: '4px 0', fontSize: '11px', color: '#6b7280' }}>Struk Pembayaran Kasir</p>
               <p style={{ margin: '4px 0', fontSize: '11px', color: '#6b7280' }}>{receipt.date}</p>
             </div>
@@ -513,7 +513,7 @@ function KatalogPage() {
 
             <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '10px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px' }}>
               <span>TOTAL:</span>
-              <span style={{ color: '#0aad0a' }}>Rp {receipt.total.toLocaleString('id-ID')}</span>
+              <span style={{ color: 'var(--brand-green)' }}>Rp {receipt.total.toLocaleString('id-ID')}</span>
             </div>
 
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -524,7 +524,7 @@ function KatalogPage() {
               </button>
               <button 
                 onClick={() => setReceipt(null)}
-                style={{ flex: 1, backgroundColor: '#0aad0a', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}>
+                style={{ flex: 1, backgroundColor: 'var(--brand-green)', color: '#fff', border: 'none', padding: '10px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '12px' }}>
                 Tutup & Transaksi Baru
               </button>
             </div>
