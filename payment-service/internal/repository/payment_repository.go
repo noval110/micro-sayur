@@ -22,18 +22,18 @@ func NewPaymentRepository(db *sql.DB) PaymentRepository { return &paymentReposit
 
 func (r *paymentRepository) Create(ctx context.Context, p *domain.Payment) error {
 	return r.db.QueryRowContext(ctx, `
-		INSERT INTO payments (order_id, user_id, amount, method, status, transaction_code)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO payments (order_id, user_id, amount, method, status, transaction_code, paydisini_data)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at, updated_at
-	`, p.OrderID, p.UserID, p.Amount, p.Method, p.Status, p.TransactionCode).Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt)
+	`, p.OrderID, p.UserID, p.Amount, p.Method, p.Status, p.TransactionCode, p.PaydisiniData).Scan(&p.ID, &p.CreatedAt, &p.UpdatedAt)
 }
 
 func (r *paymentRepository) GetByOrderID(ctx context.Context, orderID int) (*domain.Payment, error) {
 	p := new(domain.Payment)
 	err := r.db.QueryRowContext(ctx, `
-		SELECT id, order_id, user_id, amount, method, status, transaction_code, created_at, updated_at
+		SELECT id, order_id, user_id, amount, method, status, transaction_code, paydisini_data, created_at, updated_at
 		FROM payments WHERE order_id = $1
-	`, orderID).Scan(&p.ID, &p.OrderID, &p.UserID, &p.Amount, &p.Method, &p.Status, &p.TransactionCode, &p.CreatedAt, &p.UpdatedAt)
+	`, orderID).Scan(&p.ID, &p.OrderID, &p.UserID, &p.Amount, &p.Method, &p.Status, &p.TransactionCode, &p.PaydisiniData, &p.CreatedAt, &p.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrPaymentNotFound
 	}

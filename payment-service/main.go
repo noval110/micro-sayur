@@ -68,16 +68,19 @@ func main() {
 	orderClient := client.NewOrderClient(orderURL, internalKey)
 	userClient := client.NewUserClient(userURL, internalKey)
 	paymentRepo := repository.NewPaymentRepository(db)
+	paydisiniClient := client.NewPaydisiniClient()
 	paymentService := service.NewPaymentService(
 		paymentRepo,
 		orderClient,
 		userClient,
+		paydisiniClient,
 	)
 	paymentHandler := handler.NewPaymentHandler(paymentService)
 	auth := authmiddleware.NewAuthMiddleware()
 
 	e.POST("/payments/pay", paymentHandler.PayOrder, auth.Authenticated)
 	e.GET("/payments/order/:order_id", paymentHandler.GetByOrderID, auth.Authenticated)
+	e.POST("/payments/order/:order_id/check-status", paymentHandler.CheckStatus, auth.Authenticated)
 	e.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, echo.Map{"service": "payment-service", "status": "healthy"})
 	})

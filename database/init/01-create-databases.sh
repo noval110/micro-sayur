@@ -8,3 +8,4 @@ done
 psql --username "$POSTGRES_USER" --dbname sayur_product_db --file /migrations/products.sql
 psql --username "$POSTGRES_USER" --dbname sayur_order_db --file /migrations/orders.sql
 psql --username "$POSTGRES_USER" --dbname sayur_order_db --file /migrations/order-items.sql
+psql --username "$POSTGRES_USER" --dbname sayur_payment_db --file /migrations/payments.sql

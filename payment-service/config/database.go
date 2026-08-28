@@ -31,7 +31,7 @@ func InitDB() *sql.DB {
 		log.Fatal("DB_PASSWORD belum diatur")
 	}
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=require", host, port, user, password, dbName)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbName)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Fatalf("Gagal membuka database payment: %v", err)

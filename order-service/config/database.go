@@ -20,7 +20,7 @@ func InitDB() *sql.DB {
 	database := getEnv("DB_NAME", "sayur_order_db")
 
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=require",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host,
 		port,
 		user,

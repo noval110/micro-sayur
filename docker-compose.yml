@@ -18,8 +18,8 @@ services:
       - ./produk-service/database/migrations/000001_create_products_table.up.sql:/migrations/products.sql:ro
 
       - ./order-service/database/migrations/000001_create_orders_table.up.sql:/migrations/orders.sql:ro
-
       - ./order-service/database/migrations/000002_create_order_items_table.up.sql:/migrations/order-items.sql:ro
+      - ./payment-service/database/migrations/000001_create_payments_table.up.sql:/migrations/payments.sql:ro
 
     healthcheck:
       test:
@@ -120,6 +120,8 @@ services:
       RABBITMQ_URL: ${RABBITMQ_URL}
 
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
+
+      PAYDISINI_KEY: ${PAYDISINI_KEY}
 
     depends_on:
       order-service:

@@ -75,3 +75,19 @@ func (h *PaymentHandler) GetByOrderID(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{"message": "success get payment", "data": payment})
 }
+
+func (h *PaymentHandler) CheckStatus(c echo.Context) error {
+	orderID, err := strconv.Atoi(c.Param("order_id"))
+	if err != nil || orderID < 1 {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "invalid order id"})
+	}
+	userID, ok := authenticatedUserID(c)
+	if !ok {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "invalid user session"})
+	}
+	payment, err := h.paymentService.CheckPaymentStatus(c.Request().Context(), userID, orderID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": err.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{"message": "success check status", "data": payment})
+}

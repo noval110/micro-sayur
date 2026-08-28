@@ -102,6 +102,8 @@ export default function MyOrders() {
     setPaymentDetailLoading
   ] = useState(null);
 
+  const [qrisData, setQrisData] = useState(null);
+
   const [copied, setCopied] =
     useState(false);
 
@@ -432,6 +434,7 @@ export default function MyOrders() {
     setSelectedOrder(order);
     setSelectedMethod('QRIS');
     setCopied(false);
+    setQrisData(null);
   };
 
 
@@ -443,6 +446,7 @@ export default function MyOrders() {
     setSelectedOrder(null);
     setSelectedMethod('QRIS');
     setCopied(false);
+    setQrisData(null);
   };
 
 
@@ -552,6 +556,11 @@ export default function MyOrders() {
       const paymentData =
         response.data?.data;
 
+      if (selectedMethod === 'QRIS' && paymentData?.paydisini_data) {
+        setQrisData(paymentData.paydisini_data);
+        return;
+      }
+
       setOrders(
         (current) =>
           current.map(
@@ -577,7 +586,7 @@ export default function MyOrders() {
           : 'Pembayaran berhasil.'
       );
 
-      setSelectedOrder(null);
+      closePaymentModal();
 
       await fetchOrders();
 
@@ -598,6 +607,35 @@ export default function MyOrders() {
     }
   };
 
+
+  const handleCheckStatus = async () => {
+    if (!selectedOrder) return;
+    try {
+      setPaymentLoading(true);
+      const response = await api.post(`/payments/order/${selectedOrder.id}/check-status`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const paymentData = response.data?.data;
+      if (paymentData?.status === 'SUCCESS') {
+        showToast('Pembayaran QRIS berhasil!');
+        setOrders(current => current.map(order => 
+          order.id === selectedOrder.id ? { ...order, status: 'PAID' } : order
+        ));
+        closePaymentModal();
+        await fetchOrders();
+      } else if (paymentData?.status === 'FAILED') {
+        showToast('Pembayaran QRIS gagal/dibatalkan.', 'error');
+        closePaymentModal();
+      } else {
+        showToast('Pembayaran belum diterima. Silakan cek kembali nanti.');
+      }
+    } catch (err) {
+      console.error('Cek status gagal:', err.response?.data || err);
+      showToast('Gagal mengecek status pembayaran.', 'error');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
 
   // PAYMENT RECEIPT
 
@@ -1214,152 +1252,172 @@ export default function MyOrders() {
                 </strong>
               </div>
 
-
-              <div className="orders-methods">
-
-                <PaymentMethod
-                  active={
-                    selectedMethod ===
-                    'QRIS'
-                  }
-                  icon={
-                    <IconQrcode
-                      size={21}
-                    />
-                  }
-                  title="QRIS"
-                  description="Scan QR untuk pembayaran cepat."
-                  onClick={() =>
-                    setSelectedMethod(
-                      'QRIS'
-                    )
-                  }
-                />
-
-                <PaymentMethod
-                  active={
-                    selectedMethod ===
-                    'BANK_TRANSFER'
-                  }
-                  icon={
-                    <IconBuildingBank
-                      size={21}
-                    />
-                  }
-                  title="Transfer Bank"
-                  description="Bayar melalui virtual account."
-                  onClick={() =>
-                    setSelectedMethod(
-                      'BANK_TRANSFER'
-                    )
-                  }
-                />
-
-                <PaymentMethod
-                  active={
-                    selectedMethod ===
-                    'E_WALLET'
-                  }
-                  icon={
-                    <IconDeviceMobile
-                      size={21}
-                    />
-                  }
-                  title="E-Wallet"
-                  description="Gunakan dompet digital pilihanmu."
-                  onClick={() =>
-                    setSelectedMethod(
-                      'E_WALLET'
-                    )
-                  }
-                />
-
-              </div>
-
-
-              {/* METHOD INFO */}
-
-              <div className="orders-method-detail">
-                <div>
-                  <span>
-                    {
-                      methodInfo.detailTitle
-                    }
-                  </span>
-
-                  <strong>
-                    {
-                      methodInfo.detailValue
-                    }
-                  </strong>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <IconCheck
-                      size={16}
-                    />
-                  ) : (
-                    <IconCopy
-                      size={16}
-                    />
-                  )}
-                </button>
-              </div>
-
-
-              <div className="orders-payment-security">
-                <IconShieldCheck
-                  size={19}
-                />
-
-                <p>
-                  Pembayaran akan
-                  diproses melalui
-                  payment-service.
-                  Setelah berhasil,
-                  status pesanan berubah
-                  menjadi Sudah Dibayar.
-                </p>
-              </div>
-
-
-              <button
-                type="button"
-                className="orders-pay-button"
-                onClick={handlePay}
-                disabled={
-                  paymentLoading
-                }
-              >
-                {paymentLoading ? (
-                  <>
-                    <IconLoader2
-                      size={18}
-                      className="orders-spin"
-                    />
-
-                    Memproses
-                    Pembayaran...
-                  </>
-                ) : (
-                  <>
-                    <IconCreditCard
-                      size={18}
-                    />
-
-                    Bayar Rp{' '}
-                    {formatRupiah(
-                      selectedOrder
-                        .total_price
+              {qrisData ? (
+                <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                  <img src={qrisData.qrcode_url} alt="QRIS" style={{ width: '250px', maxWidth: '100%', marginBottom: '15px' }} />
+                  <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>Silakan pindai kode QR di atas dengan aplikasi e-Wallet atau m-Banking Anda.</p>
+                  
+                  <button
+                    type="button"
+                    className="orders-pay-button"
+                    onClick={handleCheckStatus}
+                    disabled={paymentLoading}
+                  >
+                    {paymentLoading ? (
+                      <><IconLoader2 size={18} className="orders-spin" /> Mengecek Status...</>
+                    ) : (
+                      <><IconRefresh size={18} /> Cek Status Pembayaran</>
                     )}
-                  </>
-                )}
-              </button>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="orders-methods">
 
+                    <PaymentMethod
+                      active={
+                        selectedMethod ===
+                        'QRIS'
+                      }
+                      icon={
+                        <IconQrcode
+                          size={21}
+                        />
+                      }
+                      title="QRIS"
+                      description="Scan QR untuk pembayaran cepat."
+                      onClick={() =>
+                        setSelectedMethod(
+                          'QRIS'
+                        )
+                      }
+                    />
+
+                    <PaymentMethod
+                      active={
+                        selectedMethod ===
+                        'BANK_TRANSFER'
+                      }
+                      icon={
+                        <IconBuildingBank
+                          size={21}
+                        />
+                      }
+                      title="Transfer Bank"
+                      description="Bayar melalui virtual account."
+                      onClick={() =>
+                        setSelectedMethod(
+                          'BANK_TRANSFER'
+                        )
+                      }
+                    />
+
+                    <PaymentMethod
+                      active={
+                        selectedMethod ===
+                        'E_WALLET'
+                      }
+                      icon={
+                        <IconDeviceMobile
+                          size={21}
+                        />
+                      }
+                      title="E-Wallet"
+                      description="Gunakan dompet digital pilihanmu."
+                      onClick={() =>
+                        setSelectedMethod(
+                          'E_WALLET'
+                        )
+                      }
+                    />
+
+                  </div>
+
+
+                  {/* METHOD INFO */}
+
+                  <div className="orders-method-detail">
+                    <div>
+                      <span>
+                        {
+                          methodInfo.detailTitle
+                        }
+                      </span>
+
+                      <strong>
+                        {
+                          methodInfo.detailValue
+                        }
+                      </strong>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                    >
+                      {copied ? (
+                        <IconCheck
+                          size={16}
+                        />
+                      ) : (
+                        <IconCopy
+                          size={16}
+                        />
+                      )}
+                    </button>
+                  </div>
+
+
+                  <div className="orders-payment-security">
+                    <IconShieldCheck
+                      size={19}
+                    />
+
+                    <p>
+                      Pembayaran akan
+                      diproses melalui
+                      payment-service.
+                      Setelah berhasil,
+                      status pesanan berubah
+                      menjadi Sudah Dibayar.
+                    </p>
+                  </div>
+
+
+                  <button
+                    type="button"
+                    className="orders-pay-button"
+                    onClick={handlePay}
+                    disabled={
+                      paymentLoading
+                    }
+                  >
+                    {paymentLoading ? (
+                      <>
+                        <IconLoader2
+                          size={18}
+                          className="orders-spin"
+                        />
+
+                        Memproses
+                        Pembayaran...
+                      </>
+                    ) : (
+                      <>
+                        <IconCreditCard
+                          size={18}
+                        />
+
+                        Bayar Rp{' '}
+                        {formatRupiah(
+                          selectedOrder
+                            .total_price
+                        )}
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
