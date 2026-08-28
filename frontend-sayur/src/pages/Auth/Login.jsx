@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import {
   Link,
   useNavigate
@@ -40,6 +41,7 @@ export default function Login() {
 
   const {
     login,
+    googleLogin,
     loading
   } = useAuth();
 
@@ -333,6 +335,29 @@ export default function Login() {
               </button>
 
             </form>
+
+            <div className="auth-divider">
+              <span>atau</span>
+            </div>
+
+            <div className="auth-google">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  try {
+                    setErrorMsg('');
+                    await googleLogin(credentialResponse.credential);
+                    navigate('/', { replace: true });
+                  } catch (err) {
+                    setErrorMsg(err?.message || 'Login dengan Google gagal.');
+                  }
+                }}
+                onError={() => setErrorMsg('Login dengan Google gagal.')}
+                text="continue_with"
+                shape="rectangular"
+                size="large"
+                width="400"
+              />
+            </div>
 
 
             <p className="auth-switch">

@@ -24,6 +24,8 @@ type UserServiceInterface interface {
 		req entity.UserEntity,
 	) (*entity.UserEntity, string, error)
 
+	GoogleSignIn(ctx context.Context, name, email string) (*entity.UserEntity, string, error)
+
 	CreateUserAccount(
 		ctx context.Context,
 		req entity.UserEntity,
@@ -43,6 +45,55 @@ type UserServiceInterface interface {
 		userID int64,
 		req entity.UserEntity,
 	) (*entity.UserEntity, error)
+}
+
+func (u *userService) createSession(ctx context.Context, user *entity.UserEntity) (string, error) {
+	token, err := u.jwtService.GenerateToken(user.ID)
+	if err != nil {
+		return "", err
+	}
+	sessionData := map[string]interface{}{
+		"user_id": user.ID, "name": user.Name, "email": user.Email,
+		"role": user.RoleName, "logged_in": "true",
+		"created_at": time.Now().String(), "token": token,
+	}
+	if err := config.NewRedisClient().HSet(ctx, token, sessionData).Err(); err != nil {
+		log.Errorf("[UserService] Redis session error: %v", err)
+		return "", err
+	}
+	return token, nil
+}
+
+func (u *userService) GoogleSignIn(ctx context.Context, name, email string) (*entity.UserEntity, string, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
+	name = strings.TrimSpace(name)
+	if email == "" {
+		return nil, "", errors.New("email Google tidak ditemukan")
+	}
+	if name == "" {
+		name = strings.Split(email, "@")[0]
+	}
+
+	user, err := u.repo.FindUserByEmail(ctx, email)
+	if err != nil && err.Error() == "404" {
+		if err := u.repo.CreateGoogleUser(ctx, entity.UserEntity{
+			Name: name, Email: email, Password: uuid.NewString(),
+		}); err != nil {
+			return nil, "", err
+		}
+		user, err = u.repo.FindUserByEmail(ctx, email)
+	}
+	if err != nil {
+		return nil, "", err
+	}
+	if !user.IsVerified {
+		if err := u.repo.MarkUserVerified(ctx, user.ID); err != nil {
+			return nil, "", err
+		}
+		user.IsVerified = true
+	}
+	token, err := u.createSession(ctx, user)
+	return user, token, err
 }
 
 type userService struct {
@@ -168,51 +219,8 @@ func (
 			)
 	}
 
-	token, err :=
-		u.jwtService.GenerateToken(
-			user.ID,
-		)
-
+	token, err := u.createSession(ctx, user)
 	if err != nil {
-		return nil, "", err
-	}
-
-	sessionData :=
-		map[string]interface{}{
-			"user_id": user.ID,
-
-			"name": user.Name,
-
-			"email": user.Email,
-
-			"role": user.RoleName,
-
-			"logged_in": "true",
-
-			"created_at": time.Now().String(),
-
-			"token": token,
-		}
-
-	redisConn :=
-		config.NewRedisClient()
-
-	err =
-		redisConn.
-			HSet(
-				ctx,
-				token,
-				sessionData,
-			).
-			Err()
-
-	if err != nil {
-
-		log.Errorf(
-			"[UserService] Redis session error: %v",
-			err,
-		)
-
 		return nil, "", err
 	}
 

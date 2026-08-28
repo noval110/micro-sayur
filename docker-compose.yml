@@ -93,6 +93,9 @@ services:
       product-service:
         condition: service_started
 
+      user-service:
+        condition: service_healthy
+
 
   # PAYMENT SERVICE
 
@@ -176,6 +179,23 @@ services:
       retries: 10
 
 
+  # NOTIFICATION SERVICE
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+
+    container_name: notification_service
+    restart: unless-stopped
+
+    env_file:
+      - ./notification-service/.env
+
+    ports:
+      - "8089:8084"
+
+
   # USER SERVICE
 
   user-service:
@@ -210,6 +230,22 @@ services:
       REDIS_TLS: ${REDIS_TLS}
 
       RABBITMQ_URL: ${RABBITMQ_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--spider",
+          "http://localhost:8084/api/check"
+        ]
+
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # API GATEWAY
 

@@ -21,16 +21,53 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"google.golang.org/api/idtoken"
 )
 
 type UserHandlerInterface interface {
 	SignIn(c echo.Context) error
+	GoogleSignIn(c echo.Context) error
 	CreateUserAccount(c echo.Context) error
 	GetAllUsers(c echo.Context) error
 	GetProfile(c echo.Context) error
 	InternalGetUserByID(c echo.Context) error
 	UpdateProfile(c echo.Context) error
 	UploadProfilePhoto(c echo.Context) error
+}
+
+func signInData(user *entity.UserEntity, token string) response.SignInResponse {
+	return response.SignInResponse{
+		ID: user.ID, Name: user.Name, Email: user.Email, Role: user.RoleName,
+		Lat: user.Lat, Lng: user.Lng, Phone: user.Phone, Photo: user.Photo,
+		AccessToken: token,
+	}
+}
+
+func (u *userHandler) GoogleSignIn(c echo.Context) error {
+	var req request.GoogleSignInRequest
+	if err := c.Bind(&req); err != nil || strings.TrimSpace(req.Credential) == "" {
+		return c.JSON(http.StatusBadRequest, echo.Map{"message": "credential Google wajib diisi", "data": nil})
+	}
+	clientID := strings.TrimSpace(os.Getenv("GOOGLE_CLIENT_ID"))
+	if clientID == "" {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "Google login belum dikonfigurasi", "data": nil})
+	}
+	payload, err := idtoken.Validate(c.Request().Context(), req.Credential, clientID)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "credential Google tidak valid", "data": nil})
+	}
+	email, _ := payload.Claims["email"].(string)
+	name, _ := payload.Claims["name"].(string)
+	emailVerified, _ := payload.Claims["email_verified"].(bool)
+	if email == "" || !emailVerified {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"message": "email Google belum terverifikasi", "data": nil})
+	}
+	user, token, err := u.userService.GoogleSignIn(c.Request().Context(), name, email)
+	if err != nil {
+		log.Errorf("[UserHandler] GoogleSignIn: %v", err)
+		return c.JSON(http.StatusInternalServerError, echo.Map{"message": "login dengan Google gagal", "data": nil})
+	}
+	return c.JSON(http.StatusOK, echo.Map{"massage": "success", "data": signInData(user, token)})
 }
 
 type userHandler struct {
@@ -506,6 +543,10 @@ func NewUserHandler(
 	e.POST(
 		"/signin",
 		userHandler.SignIn,
+	)
+	e.POST(
+		"/google",
+		userHandler.GoogleSignIn,
 	)
 
 	e.POST(

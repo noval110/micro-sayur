@@ -38,6 +38,31 @@ export const AuthProvider = ({
 
   const [loading, setLoading] =
     useState(false);
+  const saveSession = (responseData) => {
+    const accessToken = responseData?.access_token;
+
+    if (!accessToken) {
+      throw new Error('Token login tidak ditemukan dari server.');
+    }
+
+    const userData = {
+      id: responseData.id,
+      name: responseData.name,
+      email: responseData.email,
+      role: responseData.role,
+      phone: responseData.phone,
+      photo: responseData.photo,
+      lat: responseData.lat,
+      lng: responseData.lng
+    };
+
+    setToken(accessToken);
+    setUser(userData);
+    localStorage.setItem('sayur_token', accessToken);
+    localStorage.setItem('sayur_user', JSON.stringify(userData));
+
+    return { success: true, user: userData, token: accessToken };
+  };
 const login = async (
     email,
     password
@@ -57,48 +82,7 @@ const login = async (
       const responseData =
         response.data?.data;
 
-      const accessToken =
-        responseData?.access_token;
-
-      if (!accessToken) {
-        throw new Error(
-          'Token login tidak ditemukan dari server.'
-        );
-      }
-
-      const userData = {
-        id: responseData.id,
-        name: responseData.name,
-        email: responseData.email,
-        role: responseData.role,
-        phone: responseData.phone,
-        photo: responseData.photo,
-        lat: responseData.lat,
-        lng: responseData.lng
-      };
-
-      // Simpan ke state
-      setToken(accessToken);
-      setUser(userData);
-
-      // Simpan ke localStorage
-      localStorage.setItem(
-        'sayur_token',
-        accessToken
-      );
-
-      localStorage.setItem(
-        'sayur_user',
-        JSON.stringify(
-          userData
-        )
-      );
-
-      return {
-        success: true,
-        user: userData,
-        token: accessToken
-      };
+      return saveSession(responseData);
 
     } catch (err) {
       console.error(
@@ -115,6 +99,24 @@ const login = async (
 
       throw new Error(message);
 
+    } finally {
+      setLoading(false);
+    }
+  };
+const googleLogin = async (credential) => {
+    try {
+      setLoading(true);
+
+      const response = await api.post('/users/google', { credential });
+      return saveSession(response.data?.data);
+    } catch (err) {
+      console.error('Google login error:', err.response?.data || err);
+      const message =
+        err.response?.data?.message ||
+        err.response?.data?.massage ||
+        err.message ||
+        'Login dengan Google gagal.';
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
@@ -185,6 +187,7 @@ const isAuthenticated =
         isAuthenticated,
 
         login,
+        googleLogin,
         register,
         logout
       }}

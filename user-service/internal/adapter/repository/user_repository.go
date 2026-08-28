@@ -7,6 +7,7 @@ import (
 
 	"user-service/internal/core/domain/entity"
 	"user-service/internal/core/domain/model"
+	"user-service/utils/conv"
 
 	"github.com/labstack/gommon/log"
 	"gorm.io/gorm"
@@ -23,6 +24,10 @@ type UserRepositoryInterface interface {
 		req entity.UserEntity,
 	) error
 
+	CreateGoogleUser(ctx context.Context, req entity.UserEntity) error
+	FindUserByEmail(ctx context.Context, email string) (*entity.UserEntity, error)
+	MarkUserVerified(ctx context.Context, id int64) error
+
 	GetAllUsers(
 		ctx context.Context,
 	) ([]entity.UserEntity, error)
@@ -37,6 +42,46 @@ type UserRepositoryInterface interface {
 		id int64,
 		req entity.UserEntity,
 	) error
+}
+
+func (u *userRepository) MarkUserVerified(ctx context.Context, id int64) error {
+	return u.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", id).Update("is_verified", true).Error
+}
+
+func (u *userRepository) CreateGoogleUser(ctx context.Context, req entity.UserEntity) error {
+	password, err := conv.HashPassword(req.Password)
+	if err != nil {
+		return err
+	}
+
+	modelUser := model.User{
+		Name: req.Name, Email: req.Email, Password: password, IsVerified: true,
+	}
+	var customerRole model.Role
+	if err := u.db.WithContext(ctx).Where("name = ?", "Customer").First(&customerRole).Error; err == nil {
+		modelUser.Roles = []model.Role{customerRole}
+	}
+	return u.db.WithContext(ctx).Create(&modelUser).Error
+}
+
+func (u *userRepository) FindUserByEmail(ctx context.Context, email string) (*entity.UserEntity, error) {
+	var modelUser model.User
+	if err := u.db.WithContext(ctx).Where("email = ?", email).Preload("Roles").First(&modelUser).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("404")
+		}
+		return nil, err
+	}
+	roleName := ""
+	if len(modelUser.Roles) > 0 {
+		roleName = modelUser.Roles[0].Name
+	}
+	return &entity.UserEntity{
+		ID: modelUser.ID, Name: modelUser.Name, Email: modelUser.Email,
+		Password: modelUser.Password, RoleName: roleName, Address: modelUser.Address,
+		Lat: modelUser.Lat, Lng: modelUser.Lng, Phone: modelUser.Phone,
+		Photo: modelUser.Photo, IsVerified: modelUser.IsVerified,
+	}, nil
 }
 
 type userRepository struct {

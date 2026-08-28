@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+notification-service/.env
 
 # Node
 node_modules/
