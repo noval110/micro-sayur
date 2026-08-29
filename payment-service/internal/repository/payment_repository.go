@@ -14,6 +14,7 @@ type PaymentRepository interface {
 	Create(context.Context, *domain.Payment) error
 	GetByOrderID(context.Context, int) (*domain.Payment, error)
 	UpdateStatus(context.Context, int, string) error
+	UpdatePendingPayment(context.Context, *domain.Payment) error
 }
 
 type paymentRepository struct{ db *sql.DB }
@@ -55,5 +56,46 @@ func (r *paymentRepository) UpdateStatus(ctx context.Context, id int, status str
 	if rows == 0 {
 		return ErrPaymentNotFound
 	}
+	return nil
+}
+
+func (r *paymentRepository) UpdatePendingPayment(
+	ctx context.Context,
+	p *domain.Payment,
+) error {
+	result, err := r.db.ExecContext(
+		ctx,
+		`
+		UPDATE payments
+		SET
+			amount = $1,
+			method = $2,
+			status = $3,
+			transaction_code = $4,
+			paydisini_data = $5,
+			updated_at = CURRENT_TIMESTAMP
+		WHERE id = $6
+		`,
+		p.Amount,
+		p.Method,
+		p.Status,
+		p.TransactionCode,
+		p.PaydisiniData,
+		p.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return ErrPaymentNotFound
+	}
+
 	return nil
 }

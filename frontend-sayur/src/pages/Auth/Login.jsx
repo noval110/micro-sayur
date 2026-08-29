@@ -336,27 +336,48 @@ export default function Login() {
 
             </form>
 
-            <div className="auth-divider">
-              <span>atau</span>
-            </div>
+            <div className="auth-social-section">
+              <div className="auth-divider">
+                <span>atau lanjutkan dengan</span>
+              </div>
 
-            <div className="auth-google">
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  try {
-                    setErrorMsg('');
-                    await googleLogin(credentialResponse.credential);
-                    navigate('/', { replace: true });
-                  } catch (err) {
-                    setErrorMsg(err?.message || 'Login dengan Google gagal.');
-                  }
-                }}
-                onError={() => setErrorMsg('Login dengan Google gagal.')}
-                text="continue_with"
-                shape="rectangular"
-                size="large"
-                width="400"
-              />
+              <div className="auth-google-card">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    try {
+                      setErrorMsg('');
+
+                      await googleLogin(
+                        credentialResponse.credential
+                      );
+
+                      navigate('/', {
+                        replace: true
+                      });
+                    } catch (err) {
+                      setErrorMsg(
+                        err?.message ||
+                        'Login dengan Google gagal.'
+                      );
+                    }
+                  }}
+                  onError={() => {
+                    setErrorMsg(
+                      'Login dengan Google gagal.'
+                    );
+                  }}
+                  theme="outline"
+                  size="large"
+                  shape="pill"
+                  text="continue_with"
+                  logo_alignment="left"
+                  width="500"
+                />
+              </div>
+
+              <p className="auth-social-note">
+                Login cepat dan aman menggunakan akun Google.
+              </p>
             </div>
 
 

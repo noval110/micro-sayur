@@ -545,13 +545,13 @@ func NewUserHandler(
 		userHandler.SignIn,
 	)
 	e.POST(
-		"/google",
-		userHandler.GoogleSignIn,
+		"/signup",
+		userHandler.CreateUserAccount,
 	)
 
 	e.POST(
-		"/signup",
-		userHandler.CreateUserAccount,
+		"/google",
+		userHandler.GoogleSignIn,
 	)
 	mid := adapter.NewMiddlewareAdapter(cfg)
 	authGroup := e.Group(

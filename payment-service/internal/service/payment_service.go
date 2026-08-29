@@ -86,15 +86,91 @@ func (s *paymentService) Pay(ctx context.Context, userID int, req PayRequest) (*
 			)
 		}
 		if strings.EqualFold(existingPayment.Status, "PENDING") {
-			// Jika metode sama, kembalikan payment yang sudah ada (jangan error)
-			// Ini berguna agar jika user menutup modal QRIS lalu membukanya lagi, 
-			// QR code lama bisa langsung ditampilkan tanpa memanggil API pihak ketiga lagi.
 			if strings.EqualFold(existingPayment.Method, method) {
 				return existingPayment, nil
 			}
-			return nil, errors.New(
-				"pembayaran untuk order ini sedang diproses dengan metode lain",
+
+			existingPayment.Method = method
+			existingPayment.Amount = order.TotalPrice
+			existingPayment.Status = "PENDING"
+			existingPayment.TransactionCode = fmt.Sprintf(
+				"PAY-%d-%d",
+				req.OrderID,
+				time.Now().UnixNano(),
 			)
+			existingPayment.PaydisiniData = nil
+
+			if method == "QRIS" {
+				note := fmt.Sprintf(
+					"Pembayaran Pesanan #%d",
+					req.OrderID,
+				)
+
+				paydisiniData, err :=
+					s.paydisiniClient.CreateTransaction(
+						existingPayment.TransactionCode,
+						existingPayment.Amount,
+						note,
+					)
+
+				if err != nil {
+					return nil, fmt.Errorf(
+						"gagal membuat transaksi QRIS: %v",
+						err,
+					)
+				}
+
+				existingPayment.PaydisiniData = paydisiniData
+
+				if err := s.repo.UpdatePendingPayment(
+					ctx,
+					existingPayment,
+				); err != nil {
+					return nil, err
+				}
+
+				return existingPayment, nil
+			}
+
+			if err := s.repo.UpdatePendingPayment(
+				ctx,
+				existingPayment,
+			); err != nil {
+				return nil, err
+			}
+
+			if err := s.orderClient.UpdateOrderStatus(
+				req.OrderID,
+				"PAID",
+			); err != nil {
+				_ = s.repo.UpdateStatus(
+					ctx,
+					existingPayment.ID,
+					"FAILED",
+				)
+
+				existingPayment.Status = "FAILED"
+
+				return nil, fmt.Errorf(
+					"pembayaran gagal: %w",
+					err,
+				)
+			}
+
+			if err := s.repo.UpdateStatus(
+				ctx,
+				existingPayment.ID,
+				"SUCCESS",
+			); err != nil {
+				return nil, fmt.Errorf(
+					"gagal menyelesaikan status pembayaran: %w",
+					err,
+				)
+			}
+
+			existingPayment.Status = "SUCCESS"
+
+			return existingPayment, nil
 		}
 	}
 
