@@ -122,6 +122,9 @@ export default function Login() {
           </Link>
 
           <div className="auth-showcase-content">
+            <span className="auth-showcase-badge">
+              Belanja lebih mudah
+            </span>
 
             <h1>
               Produk segar untuk
